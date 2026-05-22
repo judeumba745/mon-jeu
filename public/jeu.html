@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Jeu</title>
+<link rel="stylesheet" href="style.css">
+<style>
+#mode-badge {
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 8px;
+  border-radius: 8px;
+}
+</style>
+</head>
+<body>
+<div class="game-container">
+  <div id="mode-badge"></div>
+  <div id="status">Connexion...</div>
+  <div class="scores">
+    <div>Rouge: <span id="scoreRouge">0</span></div>
+    <div>Bleu: <span id="scoreBleu">0</span></div>
+  </div>
+  <div id="plateau"></div>
+  <div id="gameOver" style="display:none;"></div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const vs = urlParams.get('vs') || urlParams.get('mode'); // accepte vs ou mode
+const matchId = urlParams.get('matchId');
+const accessCode = urlParams.get('code');
+
+const badge = document.getElementById('mode-badge');
+let socket = null;
+let monId = null;
+let couleur = null;
+
+// MODE IA
+if (vs === 'ai') {
+  badge.innerText = "Mode : Contre l'IA";
+  badge.style.background = '#1e40af';
+  badge.style.color = '#fff';
+  document.getElementById('status').innerText = "Tu joues contre l'IA";
+  initJeu('ia');
+
+// MODE TOURNOI
+} else if (matchId && accessCode) {
+  badge.innerText = 'Mode : Tournoi 1v1';
+  badge.style.background = '#92400e';
+  badge.style.color = '#facc15';
+ 
+  socket = io();
+  socket.emit('joinMatch', { matchId, accessCode });
+ 
+  socket.on('joined', (data) => {
+    document.getElementById('status').innerText = data.msg;
+  });
+ 
+  socket.on('matchStart', (data) => {
+    monId = data.monId;
+    couleur = data.couleur;
+    document.getElementById('status').innerText = `C'est parti ! Tu joues ${couleur}`;
+    initJeu('player', couleur);
+  });
+ 
+  socket.on('opponentAction', (data) => {
+    jouerCoupAdversaire(data.from, data.to);
+  });
+ 
+  socket.on('matchOver', (data) => {
+    const msg = data.winnerId === monId ? '🎉 Tu as gagné !' : 'Tu as perdu';
+    document.getElementById('status').innerText = msg;
+    document.getElementById('gameOver').style.display = 'block';
+  });
+ 
+  socket.on('error', (err) => {
+    alert(err);
+    window.location.href = '/tournoi.html';
+  });
+
+} else {
+  badge.innerText = 'Erreur';
+  badge.style.background = '#7f1d1d';
+  badge.style.color = '#fca5a5';
+  document.getElementById('status').innerText = 'Erreur : paramètres manquants';
+}
+
+// Fonction à appeler quand TOI tu joues un coup en 1v1
+function envoyerCoup(from, to) {
+  if (socket) {
+    socket.emit('playerAction', { from, to });
+  }
+}
+
+// Fonction à appeler quand la partie est finie
+function finDePartie(gagnantId) {
+  if (socket) {
+    socket.emit('matchEnd', { winnerId: gagnantId });
+  } else {
+    document.getElementById('gameOver').style.display = 'block';
+  }
+}
+</script>
+<script src="jeu.js"></script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* Écran de login */
+#login-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.login-box {
+  background: #1e293b;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  width: 320px;
+  border: 1px solid #334155;
+}
+.login-box h2 {
+  color: #fff;
+  margin-bottom: 20px;
+}
+.login-box input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #475569;
+  background: #0f172a;
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+  letter-spacing: 8px;
+}
+.login-box button {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+.login-box button:hover {
+  background: #2563eb;
+}
+.login-error {
+  color: #f87171;
+  margin-top: 10px;
+  font-size: 14px;
+}
+#dashboard-content {
+  display: none;
+}
+</style>
+</head>
+<body style="align-items:flex-start;justify-content:flex-start;">
+
+<!-- Écran mot de passe -->
+<div id="login-overlay">
+  <div class="login-box">
+    <h2>Accès Dashboard</h2>
+    <input type="password" id="password-input" placeholder="••••" maxlength="4">
+    <button onclick="checkPassword()">Entrer</button>
+    <div class="login-error" id="error-msg"></div>
+  </div>
+</div>
+
+<!-- Contenu du dashboard caché par défaut -->
+<div id="dashboard-content">
+  <div class="dashboard-container">
+   
+    <!-- JOUEURS - JEU COMPLET -->
+    <div class="dashboard-col">
+      <h2 class="col-title">JOUEURS - JEU COMPLET</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">INSCRITS</div>
+          <div class="stat-value">1,254</div>
+          <div class="stat-change up">+12.5%</div>
+          <div class="stat-sub">vs période précédente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ACTIFS</div>
+          <div class="stat-value">892</div>
+          <div class="stat-change up">+8.3%</div>
+          <div class="stat-sub">vs période précédente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">NOUVEAUX</div>
+          <div class="stat-value">342</div>
+          <div class="stat-change up">+15.7%</div>
+          <div class="stat-sub">vs période précédente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">RÉTENTION</div>
+          <div class="stat-value">68%</div>
+          <div class="stat-change up">+5.2%</div>
+          <div class="stat-sub">vs période précédente</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>ÉVOLUTION DES INSCRIPTIONS</h3>
+          <select><option>30 derniers jours</option></select>
+        </div>
+        <canvas id="chart-gc"></canvas>
+      </div>
+
+      <div class="two-cols">
+        <div class="chart-card">
+          <h3>RÉPARTITION PAR PLATEFORME</h3>
+          <canvas id="chart-platform"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>TOP PAYS</h3>
+          <div id="top-pays">
+            <div class="pays-row"><span>France</span><span>45% (665)</span></div>
+            <div class="pays-row"><span>Belgique</span><span>15% (188)</span></div>
+            <div class="pays-row"><span>Suisse</span><span>12% (151)</span></div>
+            <div class="pays-row"><span>Canada</span><span>8% (100)</span></div>
+            <div class="pays-row"><span>Autres</span><span>20% (250)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <h3>ACTIVITÉ RÉCENTE</h3>
+        <table>
+          <thead><tr><th>JOUEUR</th><th>ACTION</th><th>TEMPS</th></tr></thead>
+          <tbody>
+            <tr><td>Player123</td><td>Inscription</td><td>Il y a 2 min</td></tr>
+            <tr><td>Gamer456</td><td>Première connexion</td><td>Il y a 5 min</td></tr>
+            <tr><td>Noob789</td><td>A terminé le tutoriel</td><td>Il y a 8 min</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- JOUEURS - TOURNOI -->
+    <div class="dashboard-col">
+      <h2 class="col-title">JOUEURS - TOURNOI</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">INSCRITS</div>
+          <div class="stat-value" id="tr-inscrits">128</div>
+          <div class="stat-change up">+24.3%</div>
+          <div class="stat-sub">vs période précédente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ACTIFS</div>
+          <div class="stat-value" id="tr-actifs">96</div>
+          <div class="stat-change up">+18.7%</div>
+          <div class="stat-sub">vs période précédente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">NOUVEAUX</div>
+          <div class="stat-value" id="tr-nouveaux">32</div>
+          <div class="stat-change up">+33.3%</div>
+          <div class="stat-sub">vs période précédente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">RÉTENTION</div>
+          <div class="stat-value">75%</div>
+          <div class="stat-change up">+7.1%</div>
+          <div class="stat-sub">vs période précédente</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>ÉVOLUTION DES INSCRIPTIONS</h3>
+          <select><option>30 derniers jours</option></select>
+        </div>
+        <canvas id="chart-tr"></canvas>
+      </div>
+
+      <div class="two-cols">
+        <div class="chart-card">
+          <h3>RÉPARTITION PAR RANG</h3>
+          <canvas id="chart-rank"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>PHASE ACTUELLE</h3>
+          <div class="phase-title">Phase de qualification</div>
+          <div class="phase-time">Fin dans 2j 14h 32m</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+          <div class="phase-sub">96 / 128 inscrits</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <h3>PROCHAINS MATCHS</h3>
+        <table id="matchs-table">
+          <thead><tr><th>JOUEUR 1</th><th></th><th>JOUEUR 2</th><th>DATE</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Mot de passe
+const PASSWORD = "2004";
+
+// Vérifie si déjà connecté dans cette session
+if (sessionStorage.getItem('dashboard_auth') === 'ok') {
+  showDashboard();
+}
+
+function checkPassword() {
+  const input = document.getElementById('password-input').value;
+  const errorMsg = document.getElementById('error-msg');
+ 
+  if (input === PASSWORD) {
+    sessionStorage.setItem('dashboard_auth', 'ok');
+    showDashboard();
+  } else {
+    errorMsg.textContent = 'Mot de passe incorrect';
+    document.getElementById('password-input').value = '';
+  }
+}
+
+// Appuie sur Entrée pour valider
+document.getElementById('password-input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') checkPassword();
+});
+
+function showDashboard() {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('dashboard-content').style.display = 'block';
+  initCharts();
+}
+
+function initCharts() {
+  // Graph évolution tournoi
+  new Chart(document.getElementById('chart-tr'), {
+    type: 'line',
+    data: {
+      labels: ['1 Mai','8 Mai','15 Mai','22 Mai','29 Mai'],
+      datasets: [{ data: [100,120,130,170,150], borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.1)', tension: 0.4, fill: true }]
+    },
+    options: { plugins:{legend:false}, scales:{y:{beginAtZero:true, ticks:{color:'#94a3b8'}}, x:{ticks:{color:'#94a3b8'}}} }
+  });
+
+  // Graph évolution jeu complet
+  new Chart(document.getElementById('chart-gc'), {
+    type: 'line',
+    data: {
+      labels: ['1 Mai','8 Mai','15 Mai','22 Mai','29 Mai'],
+      datasets: [{ data: [1000,1200,1400,1600,1500], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', tension: 0.4, fill: true }]
+    },
+    options: { plugins:{legend:false}, scales:{y:{beginAtZero:true, ticks:{color:'#94a3b8'}}, x:{ticks:{color:'#94a3b8'}}} }
+  });
+
+  // Graph répartition plateforme
+  new Chart(document.getElementById('chart-platform'), {
+    type: 'doughnut',
+    data: {
+      labels: ['PC','PlayStation','Xbox','Switch'],
+      datasets: [{ data: [68,18,9,5], backgroundColor: ['#3b82f6','#a78bfa','#22d3ee','#fbbf24'] }]
+    },
+    options: { plugins:{legend:{position:'right',labels:{color:'#fff',boxWidth:12}}} }
+  });
+
+  // Graph répartition rang
+  new Chart(document.getElementById('chart-rank'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Or+','Argent','Bronze','Non classé'],
+      datasets: [{ data: [25,35,30,10], backgroundColor: ['#fbbf24','#94a3b8','#f97316','#64748b'] }]
+    },
+    options: { plugins:{legend:{position:'right',labels:{color:'#fff',boxWidth:12}}} }
+  });
+
+  loadMatchs();
+  setInterval(loadMatchs, 5000);
+}
+
+// Charger matchs tournoi
+async function loadMatchs() {
+  const res = await fetch('/api/dashboard');
+  const data = await res.json();
+  const tbody = document.querySelector('#matchs-table tbody');
+  tbody.innerHTML = '';
+  data.tournament.matches.slice(0,3).forEach(m => {
+    if (!m.played) {
+      tbody.innerHTML += `<tr>
+        <td>${m.p1.firstname} ${m.p1.name}</td>
+        <td>vs</td>
+        <td>${m.p2.firstname} ${m.p2.name}</td>
+        <td>${new Date(m.datetime).toLocaleString('fr-FR', {timeZone:'Europe/Paris'})}</td>
+      </tr>`;
+    }
+  });
+  document.getElementById('tr-inscrits').textContent = data.tournament.length;
+  document.getElementById('tr-actifs').textContent = data.tournament.length;
+  document.getElementById('tr-nouveaux').textContent = data.tournament.length;
+}
+</script>
+</body>
+</html>

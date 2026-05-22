@@ -1,0 +1,62 @@
+ <!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Programme</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h2 class="form-title">Programme des matchs</h2>
+ 
+  <div class="card-dark">
+    <h3>Matchs à venir</h3>
+    <div id="liste-matchs">
+      <p style="color:#94a3b8; text-align:center;">Chargement...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+async function chargerMatchs() {
+  const res = await fetch('/api/programme');
+  const data = await res.json();
+ 
+  const container = document.getElementById('liste-matchs');
+ 
+  if (!data.matches || data.matches.length === 0) {
+    container.innerHTML = '<p style="color:#94a3b8; text-align:center;">Aucun match programmé pour l\'instant</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+  data.matches.forEach(match => {
+    if (!match.played) {
+      const date = new Date(match.datetime).toLocaleString('fr-FR', {
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Europe/Paris'
+      });
+     
+      container.innerHTML += `
+        <div class="match-card">
+          <div class="match-joueurs">
+            <span>${match.p1.firstname} ${match.p1.name}</span>
+            <span class="vs">VS</span>
+            <span>${match.p2.firstname} ${match.p2.name}</span>
+          </div>
+          <div class="match-date">${date}</div>
+        </div>
+      `;
+    }
+  });
+}
+
+chargerMatchs();
+setInterval(chargerMatchs, 10000); // Actualise toutes les 10s
+</script>
+</body>
+</html>

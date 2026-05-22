@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tournoi</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2 class="form-title">Tournoi</h2>
+
+    <div class="card-dark">
+      <h3>S'inscrire au tournoi</h3>
+      <input type="text" id="t-firstname" placeholder="Prénom">
+      <input type="text" id="t-name" placeholder="Nom">
+      <input type="tel" id="t-phone" placeholder="Téléphone">
+      <button onclick="inscrireTournoi()">S'inscrire</button>
+      <div id="msg-reg" class="msg"></div>
+    </div>
+
+    <div class="card-dark">
+      <h3>Entrer dans le match</h3>
+      <input type="text" id="m-firstname" placeholder="Prénom">
+      <input type="text" id="m-name" placeholder="Nom">
+      <input type="text" id="m-code" placeholder="Code d'accès">
+      <button onclick="entrerMatch()">Jouer maintenant</button>
+      <div id="msg-match" class="msg"></div>
+    </div>
+  </div>
+
+  <script>
+    async function inscrireTournoi() {
+      const firstname = document.getElementById('t-firstname').value.trim();
+      const name = document.getElementById('t-name').value.trim();
+      const phone = document.getElementById('t-phone').value.trim();
+      const msg = document.getElementById('msg-reg');
+     
+      const res = await fetch('/api/tournament/join', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ firstname, name, phone })
+      });
+     
+      const data = await res.json();
+      if (data.success) {
+        msg.className = 'msg success';
+        msg.innerHTML = `Inscrit ! Ton code : <strong style="font-size:24px;">${data.accessCode}</strong><br>Garde-le bien`;
+      } else {
+        msg.className = 'msg error';
+        msg.textContent = data.error;
+      }
+    }
+
+    async function entrerMatch() {
+      const firstname = document.getElementById('m-firstname').value.trim();
+      const name = document.getElementById('m-name').value.trim();
+      const code = document.getElementById('m-code').value.trim();
+      const msg = document.getElementById('msg-match');
+     
+      msg.className = 'msg';
+      msg.textContent = '';
+     
+      const res = await fetch('/api/tournament/enter-match', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ firstname, name, code })
+      });
+     
+      const data = await res.json();
+     
+      if (data.success) {
+        // Redirection vers le jeu 1v1 avec matchId + code
+        window.location = `jeu.html?matchId=${data.matchId}&code=${code}`;
+      } else {
+        // Affiche "Votre match est dans 15min", "terminé", etc.
+        msg.className = 'msg error';
+        msg.textContent = data.message || data.error;
+      }
+    }
+  </script>
+</body>
+</html>

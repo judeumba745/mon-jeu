@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Match Live</title>
+</head>
+<body>
+  <h2 id="status">Connexion...</h2>
+  <div id="game">
+    <button onclick="sendAction('attack')">Attaquer</button>
+    <button onclick="endMatch()">Terminer Match</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const urlParams = new URLSearchParams(window.location.search);
+    const matchId = urlParams.get('matchId');
+    const accessCode = urlParams.get('code');
+
+    socket.emit('joinMatch', { matchId, accessCode });
+
+    socket.on('joined', (data) => {
+      document.getElementById('status').innerText = `Connecté: ${data.player}`;
+    });
+
+    socket.on('matchStart', () => {
+      document.getElementById('status').innerText = 'Match commencé!';
+    });
+
+    socket.on('opponentAction', (data) => {
+      console.log('Adversaire a joué:', data);
+      alert('Adversaire a fait: ' + JSON.stringify(data));
+    });
+
+    socket.on('matchOver', (data) => {
+      alert('Match terminé! Gagnant ID: ' + data.winnerId);
+      document.getElementById('status').innerText = 'Terminé';
+    });
+
+    socket.on('error', (err) => {
+      alert(err);
+    });
+
+    function sendAction(action) {
+      socket.emit('playerAction', { action, time: Date.now() });
+    }
+
+    function endMatch() {
+      const winnerId = prompt('ID du gagnant?');
+      socket.emit('matchEnd', { winnerId });
+    }
+  </script>
+</body>
+</html>

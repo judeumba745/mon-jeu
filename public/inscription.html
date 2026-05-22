@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Inscription</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h2 class="form-title">Inscription</h2>
+  <div class="card-dark">
+    <input type="text" id="firstname" placeholder="Prénom" required>
+    <input type="text" id="name" placeholder="Nom" required>
+    <input type="tel" id="phone" placeholder="Téléphone" required>
+    <button onclick="inscrire()">Jouer</button>
+    <div id="msg" class="msg"></div>
+  </div>
+</div>
+
+<script>
+async function inscrire() {
+  const firstname = document.getElementById('firstname').value.trim();
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const msg = document.getElementById('msg');
+
+  if (!firstname || !name || !phone) {
+    msg.className = 'msg error';
+    msg.textContent = 'Remplis tout';
+    return;
+  }
+
+  const res = await fetch('/api/player/register', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ firstname, name, phone })
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    localStorage.setItem('player', JSON.stringify(data.player));
+    window.location = '/mode.html';
+  } else {
+    msg.className = 'msg error';
+    msg.textContent = data.error;
+  }
+}
+</script>
+</body>
+</html>
