@@ -1,21 +1,33 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mode</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mode</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-  <h2 class="form-title">Choisis ton mode</h2>
-  <div class="card-dark">
-    <div class="btn-group">
-      <button onclick="location.href='jeu.html?mode=ia'">Jouer avec l'IA</button>
-      <button onclick="location.href='tournoi.html'">Tournoi</button>
-      <button onclick="location.href='programme.html'">Programme</button>
+  <div class="container">
+    <h2 class="form-title">Choisis ton mode</h2>
+    <div class="card-dark">
+      <div class="btn-group">
+        <button onclick="location.href='jeu.html?vs=ai'">Jouer avec l'IA</button>
+        <button onclick="location.href='tournoi.html'">Tournoi</button>
+        <button onclick="location.href='programme.html'">Programme</button>
+      </div>
     </div>
   </div>
-</div>
+
+<script>
+function demarrerIA() {
+  const couleur = "rouge";
+  const joueur1 = "Joueur";
+  const joueur2 = "IA";
+ 
+  window.location.href = `jeu.html?mode=ia&couleur=${couleur}&joueur1=${encodeURIComponent(joueur1)}&joueur2=${encodeURIComponent(joueur2)}`;
+}
+</script>
+
 </body>
 </html>

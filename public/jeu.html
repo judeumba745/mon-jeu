@@ -31,29 +31,32 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const urlParams = new URLSearchParams(window.location.search);
-const vs = urlParams.get('vs') || urlParams.get('mode'); // accepte vs ou mode
+
+// Accepte "vs" ou "mode" pour la compatibilité
+const vs = urlParams.get('vs') || urlParams.get('mode');
 const matchId = urlParams.get('matchId');
 const accessCode = urlParams.get('code');
+const couleur = urlParams.get('couleur') || 'rouge';
+const joueur1 = urlParams.get('joueur1') || 'Joueur';
+const joueur2 = urlParams.get('joueur2') || 'IA';
 
 const badge = document.getElementById('mode-badge');
 let socket = null;
 let monId = null;
-let couleur = null;
 
 // MODE IA
-if (vs === 'ai') {
+if (vs === 'ai' || vs === 'ia') {
   badge.innerText = "Mode : Contre l'IA";
   badge.style.background = '#1e40af';
   badge.style.color = '#fff';
   document.getElementById('status').innerText = "Tu joues contre l'IA";
-  initJeu('ia');
+  initJeu('ia', couleur, joueur1, joueur2);
 
 // MODE TOURNOI
 } else if (matchId && accessCode) {
   badge.innerText = 'Mode : Tournoi 1v1';
   badge.style.background = '#92400e';
   badge.style.color = '#facc15';
- 
   socket = io();
   socket.emit('joinMatch', { matchId, accessCode });
  
@@ -63,9 +66,9 @@ if (vs === 'ai') {
  
   socket.on('matchStart', (data) => {
     monId = data.monId;
-    couleur = data.couleur;
-    document.getElementById('status').innerText = `C'est parti ! Tu joues ${couleur}`;
-    initJeu('player', couleur);
+    const couleurServeur = data.couleur;
+    document.getElementById('status').innerText = `C'est parti ! Tu joues ${couleurServeur}`;
+    initJeu('player', couleurServeur, data.joueurRouge, data.joueurBleu);
   });
  
   socket.on('opponentAction', (data) => {
