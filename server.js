@@ -16,6 +16,10 @@ let fullGamePlayers = [];
 app.use(express.json());
 app.use(express.static('public'));
 
+app.get('/health', (req, res) => {
+  res.send('OK');
+});
+
 // Pages
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/mode.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'mode.html')));
