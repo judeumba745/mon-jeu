@@ -17,8 +17,8 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.get('/health', (req, res) => {
-  res.send('OK');
-});
+  res.status(200).send('OK')
+})
 
 // Pages
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
