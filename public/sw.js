@@ -3,4 +3,7 @@ self.addEventlistener('install', (e) => {
 });
 
 self.addEventlistener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then(resp => resp || fetch(e.request))
+    );
 });
