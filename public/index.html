@@ -13,5 +13,10 @@
     <button onclick="location.href='inscription.html'" style="width:100%;">Jouer maintenant</button>
   </div>
 </div>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/public/sw.js');
+  }
+</script>  
 </body>
 </html>
