@@ -1,3 +1,3 @@
-sel.addEventlistener('install', () => {
+self.addEventlistener('install', () => {
   self.skipWaiting();
 });
