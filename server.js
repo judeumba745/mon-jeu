@@ -15,7 +15,7 @@ let fullGamePlayers = [];
 
 app.use(express.json());
 app.use(express.static('public'));
-app.use(express.static(&é"'(__dirname))
+app.use(express.static(__dirname));
 app.get('/health', (req, res) => {
   res.status(200).send('OK')
 })
