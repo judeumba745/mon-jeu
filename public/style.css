@@ -1,3 +1,4 @@
+
 * {
   margin: 0;
   padding: 0;
@@ -5,9 +6,10 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Fond noir + texte vert global */
 body {
-  background: linear-gradient(180deg, #0a0e1a 0%, #111827 100%);
-  color: #fff;
+  background: #000;
+  color: #00ff66;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -21,63 +23,68 @@ body {
   text-align: center;
 }
 
+/* Titres en vert */
 .form-title {
   font-size: 28px;
   font-weight: 700;
-  color: #fbbf24;
+  color: #00ff66;
   margin-bottom: 30px;
-  text-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+  text-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
 }
 
+/* Cartes fond noir/gris très sombre */
 .card-dark {
-  background: rgba(30, 33, 48, 0.9);
+  background: #0a0a0a;
   padding: 35px 30px;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 255, 102, 0.15);
   margin-bottom: 20px;
+  border: 1px solid #00ff66;
 }
 
 .card-dark h3 {
-  color: #fbbf24;
+  color: #00ff66;
   margin-bottom: 15px;
 }
 
+/* Inputs fond noir, texte vert */
 .card-dark input {
   width: 100%;
   padding: 14px 16px;
   margin-bottom: 16px;
   border-radius: 10px;
-  border: none;
-  background: #1e293b;
-  color: #fff;
+  border: 1px solid #00ff66;
+  background: #000;
+  color: #00ff66;
   font-size: 15px;
   outline: none;
 }
 
 .card-dark input::placeholder {
-  color: #94a3b8;
+  color: #4a7a5a;
 }
 
 .card-dark input:focus {
-  box-shadow: 0 0 0 2px #3b82f6;
+  box-shadow: 0 0 0 2px #00ff66;
 }
 
+/* Boutons verts */
 .card-dark button {
   width: 140px;
   padding: 12px;
-  background: #22d3ee;
+  background: #00ff66;
   border: none;
   border-radius: 10px;
   font-weight: 700;
   font-size: 16px;
-  color: #0f172a;
+  color: #000;
   cursor: pointer;
   transition: 0.2s;
   margin-top: 10px;
 }
 
 .card-dark button:hover {
-  background: #06b6d4;
+  background: #00cc52;
   transform: translateY(-2px);
 }
 
@@ -88,11 +95,11 @@ body {
 }
 
 .msg.success {
-  color: #4ade80;
+  color: #00ff66;
 }
 
 .msg.error {
-  color: #f87171;
+  color: #ff4444;
 }
 
 .btn-group {
@@ -103,13 +110,13 @@ body {
 
 .btn-group button {
   width: 100%;
-  background: #3b82f6;
-  color: #fff;
+  background: #00ff66;
+  color: #000;
 }
 
 .btn-group button:nth-child(1) {
-  background: #22d3ee;
-  color: #0f172a;
+  background: #00ff66;
+  color: #000;
 }
 
 /* Dashboard */
@@ -132,7 +139,7 @@ body {
 .col-title {
   font-size: 18px;
   font-weight: 700;
-  color: #fff;
+  color: #00ff66;
   margin-bottom: 10px;
 }
 
@@ -143,43 +150,45 @@ body {
 }
 
 .stat-card {
-  background: #1e2130;
+  background: #0a0a0a;
   padding: 18px;
   border-radius: 12px;
+  border: 1px solid #00ff66;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #94a3b8;
+  color: #4a7a5a;
   margin-bottom: 8px;
 }
 
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #fff;
+  color: #00ff66;
   margin-bottom: 5px;
 }
 
 .stat-change.up {
-  color: #4ade80;
+  color: #00ff66;
   font-size: 13px;
 }
 
 .stat-sub {
   font-size: 11px;
-  color: #64748b;
+  color: #4a7a5a;
 }
 
 .chart-card,.table-card {
-  background: #1e2130;
+  background: #0a0a0a;
   padding: 20px;
   border-radius: 12px;
+  border: 1px solid #00ff66;
 }
 
 .chart-card h3,.table-card h3 {
   font-size: 14px;
-  color: #fff;
+  color: #00ff66;
   margin-bottom: 15px;
 }
 
@@ -191,9 +200,9 @@ body {
 }
 
 .chart-header select {
-  background: #0f1117;
-  color: #fff;
-  border: 1px solid #374151;
+  background: #000;
+  color: #00ff66;
+  border: 1px solid #00ff66;
   padding: 5px 10px;
   border-radius: 6px;
 }
@@ -212,22 +221,22 @@ table {
 table th {
   text-align: left;
   font-size: 12px;
-  color: #94a3b8;
+  color: #4a7a5a;
   padding: 10px;
-  background: #0f1117;
+  background: #000;
 }
 
 table td {
   padding: 12px 10px;
   font-size: 13px;
-  color: #e2e8f0;
-  border-bottom: 1px solid #374151;
+  color: #00ff66;
+  border-bottom: 1px solid #00ff66;
 }
 
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: #374151;
+  background: #1a1a1a;
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -235,20 +244,16 @@ table td {
 
 .progress-fill {
   height: 100%;
-  background: #3b82f6;
+  background: #00ff66;
 }
 
 @media (max-width: 1200px) {
-  .dashboard-container {
-    grid-template-columns: 1fr;
-  }
-  .stats-grid,.two-cols {
-    grid-template-columns: 1fr;
-  }
+  .dashboard-container { grid-template-columns: 1fr; }
+  .stats-grid,.two-cols { grid-template-columns: 1fr; }
 }
 
 /* ====================== */
-/* JEU - DAMIER */
+/* JEU - DAMIER - INTACT */
 /* ====================== */
 .game-container {
   display: flex;
@@ -262,7 +267,6 @@ table td {
   border: 2px solid #2c2c2c;
 }
 
-/* Header scores - style image */
 .score-header {
   display: flex;
   justify-content: space-between;
@@ -322,7 +326,7 @@ table td {
   color: #666;
 }
 
-/* Plateau */
+/* Plateau - pas touché */
 #plateau {
   display: grid;
   grid-template-columns: repeat(8, 60px);
@@ -353,7 +357,7 @@ table td {
   background: #2d2d2d;
 }
 
-/* Pions */
+/* Pions - pas touchés */
 .pion {
   width: 45px;
   height: 45px;
@@ -390,7 +394,6 @@ table td {
   transform: scale(1.1);
 }
 
-/* Footer manche */
 .round-info {
   text-align: center;
   margin-top: 20px;
@@ -402,17 +405,19 @@ table td {
 
 #gameOver {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0,0,0,0.85);
-  color: #fbbf24;
+  color: #00ff66;
   font-size: 48px;
   font-weight: 700;
   display: none;
   align-items: center;
   justify-content: center;
   z-index: 999;
-  text-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
+  text-shadow: 0 0 20px rgba(0, 255, 102, 0.8);
 }
 
 /* Responsive jeu */
@@ -435,11 +440,11 @@ table td {
 }
 
 .match-card {
-  background: #1e293b;
+  background: #0a0a0a;
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 12px;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #00ff66;
 }
 
 .match-joueurs {
@@ -448,17 +453,17 @@ table td {
   align-items: center;
   font-size: 16px;
   font-weight: 600;
-  color: #fff;
+  color: #00ff66;
   margin-bottom: 8px;
 }
 
 .match-joueurs.vs {
-  color: #fbbf24;
+  color: #00ff66;
   font-size: 14px;
 }
 
 .match-date {
   font-size: 13px;
-  color: #94a3b8;
+  color: #4a7a5a;
   text-align: center;
 }
