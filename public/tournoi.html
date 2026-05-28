@@ -1,83 +1,248 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tournoi</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tournoi</title>
+<link rel="preload" href="/style.css" as="style">
+<link rel="preload" href="/app.js" as="script">
+<style>
+body {
+  background: #000;
+  color: #fff;
+  margin:0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.form-title {
+  text-align: center;
+  color: #00ff66;
+  margin-bottom: 20px;
+}
+.card-dark {
+  background: #121212;
+  border: 1px solid #1f1f1f;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.card-dark h3 {
+  margin-top: 0;
+  color: #00ff66;
+}
+.game-list {
+  margin: 15px 0;
+}
+.game-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #1a1a1a;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.game-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #00ff66;
+}
+.btn {
+  background: #00ff66;
+  color: #000;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  width: 100%;
+  font-weight: bold;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.btn-secondary {
+  background: #333;
+  color: #fff;
+}
+.msg {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
+}
+.msg.success {
+  color: #00ff66;
+}
+.msg.error {
+  color: #ff3040;
+}
+.match-info {
+  background: #1a1a1a;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 10px;
+  border-left: 3px solid #00ff66;
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2 class="form-title">Tournoi</h2>
+<div class="container">
+<h2 class="form-title">Tournoi</h2>
 
-    <div class="card-dark">
-      <h3>S'inscrire au tournoi</h3>
-      <input type="text" id="t-firstname" placeholder="Prénom">
-      <input type="text" id="t-name" placeholder="Nom">
-      <input type="tel" id="t-phone" placeholder="Téléphone">
-      <button onclick="inscrireTournoi()">S'inscrire</button>
-      <div id="msg-reg" class="msg"></div>
-    </div>
-
-    <div class="card-dark">
-      <h3>Entrer dans le match</h3>
-      <input type="text" id="m-firstname" placeholder="Prénom">
-      <input type="text" id="m-name" placeholder="Nom">
-      <input type="text" id="m-code" placeholder="Code d'accès">
-      <button onclick="entrerMatch()">Jouer maintenant</button>
-      <div id="msg-match" class="msg"></div>
-    </div>
+<!-- BLOC INSCRIPTION -->
+<div class="card-dark">
+  <h3>1. S'inscrire au tournoi</h3>
+  <p style="font-size:13px; color:#888;">Coche les jeux auxquels tu veux participer</p>
+  <div class="game-list">
+    <label class="game-option">
+      <input type="checkbox" value="dame" name="game" checked>
+      <span>♟️ Dame</span>
+    </label>
+    <label class="game-option">
+      <input type="checkbox" value="echecs" name="game">
+      <span>♞ Échecs</span>
+    </label>
+    <label class="game-option">
+      <input type="checkbox" value="morpion" name="game">
+      <span>❌⭕ Morpion</span>
+    </label>
+    <label class="game-option">
+      <input type="checkbox" value="puissance4" name="game">
+      <span>🔵 Puissance 4</span>
+    </label>
   </div>
+  <button class="btn" onclick="inscrireTournoi()">S'inscrire</button>
+  <div id="msg-reg" class="msg"></div>
+</div>
 
-  <script>
-    async function inscrireTournoi() {
-      const firstname = document.getElementById('t-firstname').value.trim();
-      const name = document.getElementById('t-name').value.trim();
-      const phone = document.getElementById('t-phone').value.trim();
-      const msg = document.getElementById('msg-reg');
-     
-      const res = await fetch('/api/tournament/join', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ firstname, name, phone })
-      });
-     
-      const data = await res.json();
-      if (data.success) {
-        msg.className = 'msg success';
-        msg.innerHTML = `Inscrit ! Ton code : <strong style="font-size:24px;">${data.accessCode}</strong><br>Garde-le bien`;
-      } else {
-        msg.className = 'msg error';
-        msg.textContent = data.error;
-      }
-    }
+<!-- BLOC MATCH -->
+<div class="card-dark">
+  <h3>2. Entrer dans le match</h3>
+  <p style="font-size:13px; color:#888;">Clique pour lancer ton match en cours</p>
+  <div id="liste-mes-matchs">Chargement...</div>
+  <button class="btn btn-secondary" onclick="entrerMatch()">Jouer maintenant</button>
+  <div id="msg-match" class="msg"></div>
+</div>
 
-    async function entrerMatch() {
-      const firstname = document.getElementById('m-firstname').value.trim();
-      const name = document.getElementById('m-name').value.trim();
-      const code = document.getElementById('m-code').value.trim();
-      const msg = document.getElementById('msg-match');
-     
-      msg.className = 'msg';
-      msg.textContent = '';
-     
-      const res = await fetch('/api/tournament/enter-match', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ firstname, name, code })
-      });
-     
-      const data = await res.json();
-     
-      if (data.success) {
-        // Redirection vers le jeu 1v1 avec matchId + code
-        window.location = `jeu.html?matchId=${data.matchId}&code=${code}`;
-      } else {
-        // Affiche "Votre match est dans 15min", "terminé", etc.
-        msg.className = 'msg error';
-        msg.textContent = data.message || data.error;
-      }
+</div>
+
+<script>
+const token = localStorage.getItem('gameonline_token');
+if (!token) window.location = '/login.html';
+
+let mesMatchs = [];
+let profil = JSON.parse(localStorage.getItem('gameonline_profil') || '{}');
+
+chargerMesMatchs();
+
+async function inscrireTournoi() {
+  const checkboxes = document.querySelectorAll('input[name="game"]:checked');
+  const games = Array.from(checkboxes).map(cb => cb.value);
+  const msg = document.getElementById('msg-reg');
+
+  if (games.length === 0) {
+    msg.className = 'msg error';
+    msg.innerText = 'Coche au moins 1 jeu';
+    return;
+  }
+
+  msg.className = 'msg';
+  msg.innerText = 'Inscription...';
+
+  try {
+    const res = await fetch('/api/tournament/join', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: profil.name || '',
+        firstname: profil.firstname || '',
+        phone: profil.phone || '',
+        games: games
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      msg.className = 'msg success';
+      msg.innerText = data.message || 'Inscription réussie!';
+      chargerMesMatchs();
+    } else {
+      msg.className = 'msg error';
+      msg.innerText = data.error || 'Erreur inscription';
     }
-  </script>
+  } catch(e) {
+    msg.className = 'msg error';
+    msg.innerText = 'Serveur injoignable';
+  }
+}
+
+async function chargerMesMatchs() {
+  try {
+    const res = await fetch('/api/programme');
+    if (res.ok) {
+      const data = await res.json();
+      mesMatchs = data.matches.filter(m =>
+       !m.played &&
+        (m.p1.id == token || m.p2.id == token) &&
+        m.round == data.round
+      );
+      afficherMesMatchs();
+    }
+  } catch(e) {
+    document.getElementById('liste-mes-matchs').innerText = 'Erreur chargement';
+  }
+}
+
+function afficherMesMatchs() {
+  const div = document.getElementById('liste-mes-matchs');
+  if (mesMatchs.length === 0) {
+    div.innerHTML = '<p style="color:#888;">Aucun match programmé</p>';
+    return;
+  }
+
+  let html = '';
+  const emojis = {dame:'♟️', morpion:'❌⭕', puissance4:'🔵', echecs:'♞'};
+
+  mesMatchs.forEach(m => {
+    const jeu = m.gameType || 'dame';
+    html += `
+      <div class="match-info">
+        <div style="font-size:12px; color:#888;">${emojis[jeu] || '🎮'} ${jeu} - Round ${m.round}</div>
+        <div style="margin:8px 0;">
+          <strong>${m.p1.firstname} ${m.p1.name}</strong>
+          <span style="color:#00ff66;">VS</span>
+          <strong>${m.p2.firstname} ${m.p2.name}</strong>
+        </div>
+      </div>
+    `;
+  });
+  div.innerHTML = html;
+}
+
+async function entrerMatch() {
+  const res = await fetch('/api/tournament/enter-match', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ token })
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    let page = 'jeu.html';
+    if (data.gameType === 'morpion') page = 'morpion.html';
+    if (data.gameType === 'puissance4') page = 'puissance4.html';
+    if (data.gameType === 'echecs') page = 'echecs.html';
+
+    window.location = `${page}?matchId=${data.matchId}&token=${token}`;
+  } else {
+    const msg = document.getElementById('msg-match');
+    msg.className = 'msg error';
+    msg.textContent = data.error || 'Aucun match disponible';
+  }
+}
+</script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<<<<<<< HEAD
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Accueil</title>
@@ -8,12 +9,24 @@
 
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#00ff66">
+=======
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accueil</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/manifest.json">
+  <meta name="theme-color" content="#1a1a1a">
+>>>>>>> 83affde (tournoi: remove access code,use token auth onliy)
 </head>
 <body>
-<div class="container">
-  <h2 class="form-title">Bienvenue</h2>
-  <div class="card-dark">
-    <button onclick="location.href='inscription.html'" style="width:100%;">Jouer maintenant</button>
+  <div class="container">
+    <h2 class="form-title">Bienvenue</h2>
+    <div class="card-dark">
+      <div class="btn-group">
+        <button onclick="location.href='/login.html'">Se connecter</button>
+        <button onclick="location.href='/inscription.html'">S'inscrire</button>
+      </div>
+    </div>
   </div>
 </div>
 <script>
@@ -21,5 +34,12 @@
     navigator.serviceWorker.register('/sw.js');
   }
 </script>  
+
+  <script>
+    // Auto-login si déjà connecté
+    if (localStorage.getItem('gameonline_token')) {
+      window.location = '/tableau.html';
+    }
+  </script>
 </body>
 </html>

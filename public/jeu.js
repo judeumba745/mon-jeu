@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // AJOUT : Vérifie si le joueur dont c'est le tour est bloqué
     if (!hasLegalMove(tour)) {
       const gagnant = tour === "rouge" ? "Bleu" : "Rouge";
-      finish(`💀 ${gagnant} gagne ! ${tour} est bloqué.`);
+      finish(`🎉 ${gagnant} gagne !`);
       return;
     }
 
@@ -235,7 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // AJOUT : Vérifie si l'adversaire est bloqué après son coup
     if (!hasLegalMove(tour)) {
       const gagnant = tour === "rouge" ? "Bleu" : "Rouge";
-      finish(`💀 ${gagnant} gagne ! ${tour} est bloqué.`);
+      finish(`💀 ${gagnant} gagne !`);
       return;
     }
 
@@ -305,7 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Vérifie si rouge est bloqué après le coup de l'IA
     if (!hasLegalMove("rouge")) {
-      finish("💀 Bleu gagne ! Rouge est bloqué.");
+      finish("💀 Bleu gagne !");
       return;
     }
 

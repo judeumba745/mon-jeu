@@ -3,53 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inscription - GameOnline</title>
+  <title>Connexion - GameOnline</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <div class="container">
-    <h2 class="form-title">Créer un compte</h2>
+    <h2 class="form-title">Se connecter</h2>
     <div class="card-dark">
       <input id="email" type="email" placeholder="Email" required>
       <input id="password" type="password" placeholder="Mot de passe" required>
-      <input id="firstname" type="text" placeholder="Prénom" required>
-      <input id="name" type="text" placeholder="Nom" required>
-      <button onclick="register()">S'inscrire</button>
+      <button onclick="login()">Se connecter</button>
       <div id="msg" class="msg"></div>
       <p style="margin-top:15px; text-align:center; color:#94a3b8;">
-        Déjà un compte ? <a href="/login.html" style="color:#00ff66;">Se connecter</a>
+        Pas de compte ? <a href="/inscription.html" style="color:#00ff66;">S'inscrire</a>
       </p>
     </div>
   </div>
 
 <script>
-async function register() {
+async function login() {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
-  const firstname = document.getElementById('firstname').value.trim();
-  const name = document.getElementById('name').value.trim();
   const msg = document.getElementById('msg');
  
-  if (!email || !password || !firstname || !name) {
+  if (!email || !password) {
     msg.className = 'msg error';
     msg.innerText = 'Remplis tous les champs';
     return;
   }
  
   try {
-    const res = await fetch('/api/auth/register', {
+    const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ email, password, firstname, name })
+      body: JSON.stringify({ email, password })
     });
    
     const data = await res.json();
    
     if (data.success) {
       localStorage.setItem('gameonline_token', data.token);
-      msg.className = 'msg success';
-      msg.innerText = 'Compte créé ! Redirection...';
-      setTimeout(() => window.location = '/tableau.html', 1000);
+      window.location = '/tableau.html';
     } else {
       msg.className = 'msg error';
       msg.innerText = data.error;

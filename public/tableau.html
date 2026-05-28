@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau</title>
+<style>
+body { background: #000; color: #fff; margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.top-nav { background: #0a0a0a; border-bottom: 2px solid #00ff66; position: sticky; top: 0; }
+.nav-icons { display: flex; justify-content: space-around; }
+.nav-item { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 0; cursor: pointer; }
+.nav-item:hover, .nav-item.active { background: #1a1a1a; color: #00ff66; }
+.nav-item.active { border-bottom: 3px solid #00ff66; }
+.nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+.nav-item span { font-size: 12px; font-weight: 600; }
+.badge { position: absolute; top: 6px; right: calc(50% - 15px); background: #ff3040; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; min-width: 16px; text-align: center; }
+.content { padding: 16px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.card { background: #121212; border: 1px solid #1f1f1f; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.btn { background: #00ff66; color: #000; border: none; padding: 10px; border-radius: 6px; width: 100%; font-weight: bold; margin-top: 8px; cursor: pointer; }
+.error { color: #ff3040; text-align: center; padding: 20px; }
+.game-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.game-card { background: #1a1a1a; border: 1px solid #00ff66; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 600; }
+.game-card:hover { background: #00ff66; color: #000; }
+.game-badge { font-size:11px; background:#1a1a1a; padding:3px 8px; border-radius:4px; display:inline-block; margin-bottom:8px; color:#00ff66; }
+</style>
+</head>
+<body>
+<div class="top-nav">
+  <div class="nav-icons">
+    <div class="nav-item active" onclick="showTab('programme', this)">
+      <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+      <span>Programme</span>
+      <span class="badge" id="badge-programme">0</span>
+    </div>
+    <div class="nav-item" onclick="showTab('live', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+      <span>Live</span>
+      <span class="badge" id="badge-live">0</span>
+    </div>
+    <div class="nav-item" onclick="showTab('ia', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      <span>IA</span>
+    </div>
+    <div class="nav-item" onclick="location.href='/tournoi.html'">
+      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      <span>Tournoi</span>
+      <span class="badge" id="badge-tournoi">0</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <div id="tab-programme" class="tab-content active">
+    <div id="liste-programme">Chargement...</div>
+  </div>
+  <div id="tab-live" class="tab-content">
+    <div class="card">Aucun match live pour l'instant</div>
+  </div>
+  <div id="tab-ia" class="tab-content">
+    <h3 style="margin-bottom:12px;">Choisis un jeu contre l'IA</h3>
+    <div class="game-list">
+      <div class="game-card" onclick="playVsAI('dame')">♟️<br>Dame</div>
+      <div class="game-card" onclick="playVsAI('echecs')">♞<br>Échecs</div>
+      <div class="game-card" onclick="playVsAI('morpion')">❌⭕<br>Morpion</div>
+      <div class="game-card" onclick="playVsAI('puissance4')">🔵<br>Puissance 4</div>
+    </div>
+  </div>
+  <div id="tab-tournoi" class="tab-content">
+    <div id="liste-tournoi">Chargement...</div>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('gameonline_token');
+loadData();
+
+function showTab(tab, element) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  element.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+async function loadData() {
+  try {
+    const res1 = await fetch('/api/programme');
+    if (res1.ok) {
+      const data1 = await res1.json();
+      renderProgramme(data1.matches);
+      document.getElementById('badge-programme').innerText = data1.matches.filter(m => !m.played).length;
+    } else {
+      document.getElementById('liste-programme').innerHTML = '<div class="error">Erreur API programme</div>';
+    }
+  } catch(e) {
+    document.getElementById('liste-programme').innerHTML = '<div class="error">Serveur injoignable</div>';
+  }
+
+  try {
+    const res2 = await fetch('/api/tournament/ranking');
+    if (res2.ok) {
+      const data2 = await res2.json();
+      renderTournoi(data2.ranking);
+      document.getElementById('badge-tournoi').innerText = data2.ranking.filter(p => !p.eliminated).length;
+    } else {
+      document.getElementById('liste-tournoi').innerHTML = '<div class="error">Erreur API tournoi</div>';
+    }
+  } catch(e) {
+    document.getElementById('liste-tournoi').innerHTML = '<div class="error">Serveur injoignable</div>';
+  }
+}
+
+function renderProgramme(matches) {
+  const div = document.getElementById('liste-programme');
+  if (!matches || matches.length === 0) {
+    div.innerHTML = '<div class="card">Aucun match programmé</div>';
+    return;
+  }
+
+  const emojis = {dame:'♟️', morpion:'❌⭕', puissance4:'🔵', echecs:'♞'};
+  let html = '';
+ 
+  matches.filter(m => !m.played).slice(0, 10).forEach(m => {
+    const jeu = m.gameType || 'dame';
+    html += `
+      <div class="card">
+        <div class="game-badge">${emojis[jeu]} ${jeu}</div>
+        <div style="font-size:12px; color:#888;">Round ${m.round}</div>
+        <div style="display:flex; justify-content:space-between; margin:10px 0;">
+          <span>${m.p1.firstname} ${m.p1.name}</span>
+          <span style="color:#00ff66;">VS</span>
+          <span>${m.p2.firstname} ${m.p2.name}</span>
+        </div>
+        <button class="btn" onclick="enterMatch(${m.id}, '${jeu}')">Jouer</button>
+      </div>
+    `;
+  });
+  div.innerHTML = html;
+}
+
+function renderTournoi(ranking) {
+  const div = document.getElementById('liste-tournoi');
+  if (!ranking || ranking.length === 0) {
+    div.innerHTML = '<div class="card">Aucun joueur</div>';
+    return;
+  }
+  let html = '';
+  ranking.slice(0, 10).forEach(p => {
+    html += `
+      <div class="card">
+        <div style="display:flex; justify-content:space-between;">
+          <span>${p.rank}. ${p.firstname} ${p.name}</span>
+          <span>${p.wins}V - ${p.losses}D</span>
+        </div>
+        <div style="font-size:12px; color:${p.eliminated ? '#ff3040' : '#00ff66'};">${p.status}</div>
+      </div>
+    `;
+  });
+  div.innerHTML = html;
+}
+
+// CORRECTION ICI
+function enterMatch(matchId, gameType) {
+  let page = 'jeu.html';
+  if (gameType === 'morpion') page = 'morpion.html';
+  if (gameType === 'puissance4') page = 'puissance4.html';
+  if (gameType === 'echecs') page = 'echecs.html';
+ 
+  location.href = `/${page}?matchId=${matchId}&token=${token || ''}`;
+}
+
+function playVsAI(game) {
+  let page = 'jeu.html';
+  if (game === 'morpion') page = 'morpion.html';
+  if (game === 'puissance4') page = 'puissance4.html';
+  if (game === 'echecs') page = 'echecs.html';
+ 
+  location.href = `/${page}?mode=ia&game=${game}&token=${token || ''}`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Morpion Game</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:Arial, sans-serif; }
+body{ background:#0f0f0f; color:white; display:flex; justify-content:center; align-items:center; height:100vh; }
+.game-container{ text-align:center; width:100%; max-width:400px; padding:20px; }
+h1{ color:#00ff66; margin-bottom:15px; font-size:40px; }
+.status{ margin-bottom:20px; font-size:20px; color:#00ff66; }
+.board{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
+.cell{ width:100px; height:100px; background:#1b1b1b; border:2px solid #00ff66; border-radius:15px; display:flex; justify-content:center; align-items:center; font-size:50px; cursor:pointer; transition:0.2s; }
+.cell:hover{ background:#222; transform:scale(1.05); }
+.cell.disabled{ cursor:not-allowed; opacity:0.6; }
+.x{ color:#00ff66; }
+.o{ color:#ff4444; }
+button{ margin-top:20px; padding:12px 25px; border:none; background:#00ff66; color:black; font-size:18px; border-radius:10px; cursor:pointer; transition:0.2s; }
+button:hover{ background:#00cc55; }
+@media(max-width:500px){.cell{ width:85px; height:85px; font-size:40px; } }
+</style>
+</head>
+<body>
+<div class="game-container">
+<h1>Morpion</h1>
+<div class="status" id="status">Connexion...</div>
+<div class="board" id="board">
+<div class="cell" data-index="0"></div>
+<div class="cell" data-index="1"></div>
+<div class="cell" data-index="2"></div>
+<div class="cell" data-index="3"></div>
+<div class="cell" data-index="4"></div>
+<div class="cell" data-index="5"></div>
+<div class="cell" data-index="6"></div>
+<div class="cell" data-index="7"></div>
+<div class="cell" data-index="8"></div>
+</div>
+<button onclick="leaveMatch()">Quitter</button>
+</div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const mode = (urlParams.get('mode') || "").trim().toLowerCase();
+const matchId = urlParams.get('matchId');
+const token = urlParams.get('token');
+
+const socket = io();
+const cells = document.querySelectorAll(".cell");
+const statusText = document.getElementById("status");
+
+let mySymbol = null;
+let currentPlayer = 'X';
+let board = Array(9).fill(null);
+let gameActive = true;
+
+// DEBUG : supprime après test
+console.log("Mode:", mode, "MatchId:", matchId, "Token:", token);
+
+// ===============================
+// MODE IA
+// ===============================
+if(mode === "ia"){
+  statusText.innerHTML = "Mode IA";
+  mySymbol = "X";
+  currentPlayer = "X";
+  updateBoard();
+  updateStatus();
+
+  cells.forEach(cell => {
+    cell.addEventListener("click", () => {
+      const index = parseInt(cell.dataset.index);
+      if(!gameActive || board[index] || currentPlayer!== mySymbol) return;
+
+      board[index] = mySymbol;
+      updateBoard();
+
+      if(checkWinner(mySymbol)){
+        statusText.innerHTML = "🎉 Tu as gagné!";
+        gameActive = false;
+        disableBoard();
+        return;
+      }
+      if(board.every(cell => cell)){
+        statusText.innerHTML = "🤝 Match nul!";
+        gameActive = false;
+        disableBoard();
+        return;
+      }
+
+      currentPlayer = "O";
+      updateStatus();
+      setTimeout(aiMove, 500);
+    });
+  });
+
+// ===============================
+// MODE ONLINE / TOURNOI
+// ===============================
+} else {
+  if(!matchId ||!token){
+    alert("Match invalide");
+    window.location.href = "/tournoi.html";
+    return;
+  }
+
+  socket.emit('joinMatch', { matchId, token, accessCode: token });
+
+  socket.on('gameStart', (data) => {
+    mySymbol = data.symbol;
+    board = data.state.board;
+    currentPlayer = data.state.currentPlayer;
+    updateBoard();
+    updateStatus();
+  });
+
+  socket.on('move', (data) => {
+    board = data.board;
+    currentPlayer = data.currentPlayer;
+    updateBoard();
+    updateStatus();
+  });
+
+  socket.on('gameOver', (data) => {
+    gameActive = false;
+    if (data.winner === 'draw') {
+      statusText.innerHTML = "🤝 Match nul!";
+    } else if (data.winner === token) {
+      statusText.innerHTML = "🎉 Tu as gagné!";
+    } else {
+      statusText.innerHTML = "💀 Tu as perdu!";
+    }
+    disableBoard();
+  });
+
+  socket.on('error', (msg) => {
+    alert(msg);
+    window.location.href = '/tournoi.html';
+  });
+
+  cells.forEach(cell => {
+    cell.addEventListener("click", () => {
+      const index = parseInt(cell.dataset.index);
+      if(!gameActive || board[index] || currentPlayer!== mySymbol) return;
+      socket.emit('makeMove', { matchId, token, move: { index } });
+    });
+  });
+}
+
+// ===============================
+// IA
+// ===============================
+function aiMove(){
+  if(!gameActive) return;
+  let emptyCells = [];
+  board.forEach((cell, index) => {
+    if(!cell) emptyCells.push(index);
+  });
+  if(emptyCells.length === 0) return;
+
+  const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  board[randomIndex] = "O";
+  updateBoard();
+
+  if(checkWinner("O")){
+    statusText.innerHTML = "💀 IA a gagné!";
+    gameActive = false;
+    disableBoard();
+    return;
+  }
+  if(board.every(cell => cell)){
+    statusText.innerHTML = "🤝 Match nul!";
+    gameActive = false;
+    disableBoard();
+    return;
+  }
+
+  currentPlayer = "X";
+  updateStatus();
+}
+
+// ===============================
+// WIN CHECK
+// ===============================
+function checkWinner(player){
+  const wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  return wins.some(comb => comb.every(index => board[index] === player));
+}
+
+// ===============================
+// UPDATE BOARD
+// ===============================
+function updateBoard(){
+  board.forEach((val, i) => {
+    cells[i].textContent = val || '';
+    cells[i].className = 'cell';
+    if(val){
+      cells[i].classList.add(val.toLowerCase());
+    }
+    if(!gameActive || val || currentPlayer!== mySymbol){
+      cells[i].classList.add('disabled');
+    }
+  });
+}
+
+// ===============================
+// STATUS
+// ===============================
+function updateStatus(){
+  if(!gameActive) return;
+  if(mode === "ia"){
+    statusText.innerHTML = currentPlayer === mySymbol? "C'est ton tour" : "Tour de l'IA";
+  } else {
+    statusText.innerHTML = currentPlayer === mySymbol? "C'est ton tour" : "Tour de l'adversaire";
+  }
+}
+
+// ===============================
+// DISABLE
+// ===============================
+function disableBoard(){
+  cells.forEach(cell => cell.classList.add('disabled'));
+}
+
+// ===============================
+// QUITTER
+// ===============================
+function leaveMatch(){
+  if(mode === "ia"){
+    window.location.href = "/";
+  } else {
+    window.location.href = "/tournoi.html";
+  }
+}
+</script>
+</body>
+</html>

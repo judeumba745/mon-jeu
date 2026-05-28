@@ -7,17 +7,60 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <style>
-#login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.login-box { background: #1e293b; padding: 40px; border-radius: 12px; text-align: center; width: 320px; border: 1px solid #334155; }
+#login-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: #0f172a; display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.login-box {
+  background: #1e293b; padding: 40px; border-radius: 12px; text-align: center;
+  width: 320px; border: 1px solid #334155;
+}
 .login-box h2 { color: #fff; margin-bottom: 20px; }
-.login-box input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 18px; text-align: center; letter-spacing: 8px; }
-.login-box button { margin-top: 15px; width: 100%; padding: 12px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-weight: bold; cursor: pointer; }
+.login-box input {
+  width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569;
+  background: #0f172a; color: #fff; font-size: 18px; text-align: center; letter-spacing: 8px;
+}
+.login-box button {
+  margin-top: 15px; width: 100%; padding: 12px; border-radius: 8px; border: none;
+  background: #3b82f6; color: white; font-weight: bold; cursor: pointer;
+}
 .login-box button:hover { background: #2563eb; }
 .login-error { color: #f87171; margin-top: 10px; font-size: 14px; }
 #dashboard-content { display: none; }
+
+.dashboard-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; }
+.dashboard-col { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid #334155; }
+.col-title { color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+.stat-card { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155; }
+.stat-label { color: #94a3b8; font-size: 12px; margin-bottom: 5px; }
+.stat-value { color: #fff; font-size: 28px; font-weight: 700; }
+.stat-change { font-size: 13px; margin-top: 5px; }
+.stat-change.up { color: #4ade80; }
+.stat-sub { color: #64748b; font-size: 11px; }
+.chart-card { background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #334155; }
+.chart-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.chart-header h3 { color: #fff; font-size: 14px; }
+.two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.table-card { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155; }
+.table-card h3 { color: #fff; font-size: 14px; margin-bottom: 10px; }
+table { width: 100%; border-collapse: collapse; color: #cbd5e1; font-size: 13px; }
+th { text-align: left; padding: 10px; color: #94a3b8; border-bottom: 1px solid #334155; }
+td { padding: 10px; border-bottom: 1px solid #1e293b; }
+.phase-title { color: #fff; font-weight: 600; margin-bottom: 10px; }
+.progress-bar { background: #334155; height: 8px; border-radius: 4px; overflow: hidden; }
+.progress-fill { background: #3b82f6; height: 100%; transition: width 0.3s; }
+.phase-sub { color: #94a3b8; font-size: 12px; margin-top: 8px; }
+.game-breakdown { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.game-item { background: #1e293b; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+.game-item span:first-child { color: #cbd5e1; }
+.game-item span:last-child { color: #fff; font-weight: 700; font-size: 18px; }
+.status-online { color: #4ade80; }
+.status-offline { color: #64748b; }
 </style>
 </head>
-<body style="align-items:flex-start;justify-content:flex-start;">
+<body style="align-items:flex-start;justify-content:flex-start;background:#0f172a;">
 <div id="login-overlay">
   <div class="login-box">
     <h2>Accès Dashboard</h2>
@@ -29,66 +72,82 @@
 
 <div id="dashboard-content">
   <div class="dashboard-container">
-
-    <!-- JOUEURS - JEU COMPLET -->
+   
+    <!-- PARTIE 1 : JOUEURS SITE -->
     <div class="dashboard-col">
-      <h2 class="col-title">JOUEURS - JEU COMPLET</h2>
+      <h2 class="col-title">JOUEURS - SITE COMPLET</h2>
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">INSCRITS</div>
-          <div class="stat-value" id="gc-inscrits">0</div>
-          <div class="stat-change up" id="gc-inscrits-change">+0%</div>
+          <div class="stat-value" id="site-inscrits">0</div>
+          <div class="stat-change up" id="site-inscrits-change">+0%</div>
           <div class="stat-sub">vs période précédente</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">ACTIFS</div>
-          <div class="stat-value" id="gc-actifs">0</div>
-          <div class="stat-change up" id="gc-actifs-change">+0%</div>
+          <div class="stat-value" id="site-actifs">0</div>
+          <div class="stat-change up" id="site-actifs-change">+0%</div>
           <div class="stat-sub">vs période précédente</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">NOUVEAUX</div>
-          <div class="stat-value" id="gc-nouveaux">0</div>
-          <div class="stat-change up" id="gc-nouveaux-change">+0%</div>
-          <div class="stat-sub">vs période précédente</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- JOUEURS - TOURNOI -->
-    <div class="dashboard-col">
-      <h2 class="col-title">JOUEURS - TOURNOI</h2>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">INSCRITS</div>
-          <div class="stat-value" id="tr-inscrits">0</div>
-          <div class="stat-change up" id="tr-inscrits-change">+0%</div>
-          <div class="stat-sub">vs période précédente</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">ACTIFS</div>
-          <div class="stat-value" id="tr-actifs">0</div>
-          <div class="stat-change up" id="tr-actifs-change">+0%</div>
-          <div class="stat-sub">vs période précédente</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">NOUVEAUX</div>
-          <div class="stat-value" id="tr-nouveaux">0</div>
-          <div class="stat-change up" id="tr-nouveaux-change">+0%</div>
+          <div class="stat-value" id="site-nouveaux">0</div>
+          <div class="stat-change up" id="site-nouveaux-change">+0%</div>
           <div class="stat-sub">vs période précédente</div>
         </div>
       </div>
 
       <div class="chart-card">
-        <div class="chart-header">
-          <h3>ÉVOLUTION DES INSCRIPTIONS</h3>
+        <div class="chart-header"><h3>ÉVOLUTION DES INSCRIPTIONS</h3></div>
+        <canvas id="chart-site"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <h3>ACTIVITÉ RÉCENTE</h3>
+        <table id="activity-table">
+          <thead><tr><th>JOUEUR</th><th>ACTION</th><th>TEMPS</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PARTIE 2 : JOUEURS PAR TOURNOI -->
+    <div class="dashboard-col">
+      <h2 class="col-title">JOUEURS - PAR TOURNOI</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">TOTAL INSCRITS</div>
+          <div class="stat-value" id="tr-inscrits">0</div>
+          <div class="stat-change up" id="tr-inscrits-change">+0%</div>
+          <div class="stat-sub">tous tournois</div>
         </div>
-        <canvas id="chart-tr"></canvas>
+        <div class="stat-card">
+          <div class="stat-label">ACTIFS</div>
+          <div class="stat-value" id="tr-actifs">0</div>
+          <div class="stat-change up" id="tr-actifs-change">+0%</div>
+          <div class="stat-sub">en cours</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">NOUVEAUX</div>
+          <div class="stat-value" id="tr-nouveaux">0</div>
+          <div class="stat-change up" id="tr-nouveaux-change">+0%</div>
+          <div class="stat-sub">aujourd'hui</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>RÉPARTITION PAR JEU</h3>
+        <div class="game-breakdown" id="game-breakdown">
+          <div class="game-item"><span>♟️ Dame</span><span id="count-dame">0</span></div>
+          <div class="game-item"><span>♞ Échecs</span><span id="count-echecs">0</span></div>
+          <div class="game-item"><span>❌⭕ Morpion</span><span id="count-morpion">0</span></div>
+          <div class="game-item"><span>🔵 Puissance 4</span><span id="count-puissance4">0</span></div>
+        </div>
       </div>
 
       <div class="two-cols">
         <div class="chart-card">
-          <h3>RÉPARTITION PAR RANG</h3>
+          <h3>RÉPARTITION PAR STATUT</h3>
           <canvas id="chart-rank"></canvas>
         </div>
         <div class="chart-card">
@@ -102,20 +161,32 @@
       <div class="table-card">
         <h3>PROCHAINS MATCHS</h3>
         <table id="matchs-table">
-          <thead><tr><th>JOUEUR 1</th><th></th><th>JOUEUR 2</th><th>DATE</th></tr></thead>
+          <thead><tr><th>JOUEUR 1</th><th></th><th>JOUEUR 2</th><th>JEU</th><th>DATE</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
     </div>
+
+    <!-- PARTIE 3 : JOUEURS EN LIGNE - pleine largeur -->
+    <div class="dashboard-col" style="grid-column: 1 / 3;">
+      <h2 class="col-title">JOUEURS EN LIGNE <span id="online-count" style="color:#4ade80;">0</span></h2>
+      <div class="table-card">
+        <table id="online-table">
+          <thead><tr><th>JOUEUR</th><th>STATUT</th><th>JEU ACTUEL</th><th>DERNIÈRE ACTIVITÉ</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <script>
 const PASSWORD = "2004";
 const socket = io();
-let chartTr, chartRank;
-let prevInscrits = 0;
-let prevGcInscrits = 0;
+let chartSite, chartRank;
+let prevSiteInscrits = 0;
+let prevTrInscrits = 0;
 
 if (sessionStorage.getItem('dashboard_auth') === 'ok') showDashboard();
 
@@ -144,11 +215,12 @@ function showDashboard() {
 }
 
 function initCharts() {
-  chartTr = new Chart(document.getElementById('chart-tr'), {
+  chartSite = new Chart(document.getElementById('chart-site'), {
     type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.1)', tension: 0.4, fill: true }]},
+    data: { labels: [], datasets: [{ data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', tension: 0.4, fill: true }]},
     options: { plugins:{legend:false}, scales:{y:{beginAtZero:true, ticks:{color:'#94a3b8'}}, x:{ticks:{color:'#94a3b8'}}} }
   });
+
   chartRank = new Chart(document.getElementById('chart-rank'), {
     type: 'doughnut',
     data: { labels: ['Actifs','Éliminés'], datasets: [{ data: [0,0], backgroundColor: ['#3b82f6','#ef4444'] }]},
@@ -160,71 +232,98 @@ async function loadData() {
   try {
     const res = await fetch('/api/dashboard');
     const data = await res.json();
-    const t = data.tournament;
-    const gc = data.gameComplete;
+    const site = data.site || {};
+    const tournament = data.tournament || {};
+    const online = data.online || [];
 
-    // Calcul changement %
-    const change = prevInscrits === 0? 0 : Math.round(((t.inscrits - prevInscrits) / prevInscrits) * 100);
-    prevInscrits = t.inscrits;
+    // PARTIE 1 : Stats site
+    const siteChange = prevSiteInscrits === 0 ? 0 : Math.round(((site.inscrits - prevSiteInscrits) / prevSiteInscrits) * 100);
+    prevSiteInscrits = site.inscrits || 0;
+   
+    document.getElementById('site-inscrits').textContent = site.inscrits || 0;
+    document.getElementById('site-actifs').textContent = site.actifs || 0;
+    document.getElementById('site-nouveaux').textContent = site.nouveaux || 0;
+    document.getElementById('site-inscrits-change').textContent = (siteChange >= 0 ? '+' : '') + siteChange + '%';
 
-    const gcChange = prevGcInscrits === 0? 0 : Math.round(((gc.inscrits - prevGcInscrits) / prevGcInscrits) * 100);
-    prevGcInscrits = gc.inscrits;
+    // Activité récente
+    const tbodyAct = document.querySelector('#activity-table tbody');
+    tbodyAct.innerHTML = '';
+    (site.activity || []).slice(0,5).forEach(a => {
+      tbodyAct.innerHTML += `<tr><td>${a.player}</td><td>${a.action}</td><td>${a.time}</td></tr>`;
+    });
 
-    // MAJ stats TOURNOI
-    document.getElementById('tr-inscrits').textContent = t.inscrits;
-    document.getElementById('tr-actifs').textContent = t.actifs;
-    document.getElementById('tr-nouveaux').textContent = t.nouveaux;
-    document.getElementById('tr-inscrits-change').textContent = (change >= 0? '+' : '') + change + '%';
+    // PARTIE 2 : Stats tournoi
+    const trChange = prevTrInscrits === 0 ? 0 : Math.round(((tournament.inscrits - prevTrInscrits) / prevTrInscrits) * 100);
+    prevTrInscrits = tournament.inscrits || 0;
 
-    // MAJ stats JEU COMPLET - AJOUT
-    document.getElementById('gc-inscrits').textContent = gc.inscrits;
-    document.getElementById('gc-actifs').textContent = gc.actifs;
-    document.getElementById('gc-nouveaux').textContent = gc.nouveaux;
-    document.getElementById('gc-inscrits-change').textContent = (gcChange >= 0? '+' : '') + gcChange + '%';
+    document.getElementById('tr-inscrits').textContent = tournament.inscrits || 0;
+    document.getElementById('tr-actifs').textContent = tournament.actifs || 0;
+    document.getElementById('tr-nouveaux').textContent = tournament.nouveaux || 0;
+    document.getElementById('tr-inscrits-change').textContent = (trChange >= 0 ? '+' : '') + trChange + '%';
 
-    // MAJ phase
-    const phaseText = t.status === 'registration'? 'Inscriptions ouvertes' : t.status === 'running'? `Tour ${t.currentRound}` : 'Terminé';
+    // Répartition par jeu
+    document.getElementById('count-dame').textContent = tournament.byGame?.dame || 0;
+    document.getElementById('count-echecs').textContent = tournament.byGame?.echecs || 0;
+    document.getElementById('count-morpion').textContent = tournament.byGame?.morpion || 0;
+    document.getElementById('count-puissance4').textContent = tournament.byGame?.puissance4 || 0;
+
+    // Phase actuelle
+    const phaseText = tournament.status === 'registration' ? 'Inscriptions ouvertes' :
+                      tournament.status === 'running' ? `Tour ${tournament.currentRound}` : 'Terminé';
     document.getElementById('phase-title').textContent = phaseText;
-    document.getElementById('phase-sub').textContent = `${t.inscrits} / 128 inscrits`;
-    document.getElementById('progress-fill').style.width = Math.min(100, (t.inscrits / 128) * 100) + '%';
+    document.getElementById('phase-sub').textContent = `${tournament.inscrits || 0} / 128 inscrits`;
+    document.getElementById('progress-fill').style.width = Math.min(100, ((tournament.inscrits || 0) / 128) * 100) + '%';
 
-    // MAJ matchs
-    const tbody = document.querySelector('#matchs-table tbody');
-    tbody.innerHTML = '';
-    t.matches.filter(m =>!m.played).slice(0,5).forEach(m => {
-      tbody.innerHTML += `<tr>
+    // Prochains matchs
+    const tbodyMatch = document.querySelector('#matchs-table tbody');
+    tbodyMatch.innerHTML = '';
+    (tournament.matches || []).filter(m => !m.played).slice(0,5).forEach(m => {
+      tbodyMatch.innerHTML += `<tr>
         <td>${m.p1.firstname} ${m.p1.name}</td>
         <td>vs</td>
         <td>${m.p2.firstname} ${m.p2.name}</td>
+        <td>${m.gameType}</td>
         <td>${new Date(m.datetime).toLocaleString('fr-FR', {timeZone:'Africa/Kinshasa'})}</td>
       </tr>`;
     });
 
-    // MAJ chart évolution
+    // Chart rang
+    const actifs = tournament.players?.filter(p => p.status !== 'eliminated').length || 0;
+    const elimines = tournament.players?.filter(p => p.status === 'eliminated').length || 0;
+    chartRank.data.datasets[0].data = [actifs, elimines];
+    chartRank.update();
+
+    // Chart évolution site
     const labels = [];
     const values = [];
     for(let i=6; i>=0; i--){
       const d = new Date();
       d.setDate(d.getDate() - i);
       labels.push(d.toLocaleDateString('fr-FR', {day:'2-digit', month:'short'}));
-      values.push(t.inscrits);
+      values.push(site.inscrits || 0);
     }
-    chartTr.data.labels = labels;
-    chartTr.data.datasets[0].data = values;
-    chartTr.update();
+    chartSite.data.labels = labels;
+    chartSite.data.datasets[0].data = values;
+    chartSite.update();
 
-    // MAJ chart rang
-    const actifs = t.players.filter(p => p.status!== 'eliminated').length;
-    const elimines = t.players.filter(p => p.status === 'eliminated').length;
-    chartRank.data.datasets[0].data = [actifs, elimines];
-    chartRank.update();
+    // PARTIE 3 : Joueurs en ligne
+    document.getElementById('online-count').textContent = online.length;
+    const tbodyOnline = document.querySelector('#online-table tbody');
+    tbodyOnline.innerHTML = '';
+    online.slice(0,15).forEach(p => {
+      tbodyOnline.innerHTML += `<tr>
+        <td>${p.firstname} ${p.name}</td>
+        <td class="${p.online ? 'status-online' : 'status-offline'}">${p.online ? 'En ligne' : 'Hors ligne'}</td>
+        <td>${p.currentGame || '-'}</td>
+        <td>${p.lastActivity || '-'}</td>
+      </tr>`;
+    });
 
   } catch(e) {
     console.error('Erreur dashboard:', e);
   }
 }
 
-// Temps réel
 socket.on('dashboardUpdate', () => {
   loadData();
 });
