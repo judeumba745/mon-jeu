@@ -5,7 +5,16 @@ const { Server } = require('socket.io');
 const schedule = require('node-schedule');
 const crypto = require('crypto');
 
-const db = require('./db');
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+pool.connect()
+.then(() => console.log('✅ Connecté à Postgres'))
+.catch(err => console.error('❌ Erreur Postgres:', err));
 
 const app = express();
 const server = http.createServer(app);
@@ -25,15 +34,16 @@ app.use(express.static(__dirname, { maxAge: '1d' }));
 app.post('/register', (req, res) => {
   const { username, password } = req.body;
 
-  db.run(
-    "INSERT INTO users (username, password) VALUES (?, ?)",
-    [username, password],
-    (err) => {
-      if (err) return res.json({ error: "Erreur" });
-
-      res.json({ success: "Compte créé" });
-    }
+try{
+  await pool.query(
+    "INSERT INTO users (username, password) VALUES ($1, $2)",
+    [username, password]
   );
+   res.json({ success: "Compte créé" });
+    } catch(err) {
+      console.error(err);
+      res.json({ error: "Erreur" });
+  }
 });
 
 app.get('/health', (req, res) => { res.status(200).send('OK') })
