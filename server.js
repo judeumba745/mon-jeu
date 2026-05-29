@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(express.static('public', { maxAge: '1d' }));
 app.use(express.static(__dirname, { maxAge: '1d' }));
 
-app.post('/register', (req, res) => {
+app.post('/register', async(req, res) => {
   const { username, password } = req.body;
 
 try{
