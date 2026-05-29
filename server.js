@@ -465,7 +465,12 @@ app.post('/api/tournament/join', (req, res) => {
   io.emit('dashboardUpdate');
   res.json({ success: true, accessCode, message: `Inscrit! Ton code: ${accessCode}` });
 });
-
+app.get('/api/programme', (req, res) => {
+  res.json({
+    round: tournament.currentRound,
+    matches: tournament.matches
+  });
+});
 // API Dashboard MODIFIÉE
 app.get('/api/dashboard', (req, res) => {
   const actifs = tournament.players.filter(p =>!p.eliminated).length;
@@ -565,7 +570,6 @@ app.post('/api/auth/register', (req, res) => {
     status: 'active'
   };
 
-  tournament.players.push(player);
   fullGamePlayers.push(player);
   accounts.set(email, { passwordHash, playerId });
   io.emit('dashboardUpdate');
