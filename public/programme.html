@@ -17,7 +17,7 @@
     </div>
   </div>
 </div>
-
+<script src="/socket.io/socket.io.js"></script>
 <script>
 async function chargerMatchs() {
   const res = await fetch('/api/programme');
@@ -29,6 +29,15 @@ async function chargerMatchs() {
     container.innerHTML = '<p style="color:#94a3b8; text-align:center;">Aucun match programmé pour l\'instant</p>';
     return;
   }
+
+ const socket = io();
+
+socket.emit('userOnline', {
+  playerId: 'programme-' + Date.now(),
+  firstname: 'Visiteur',
+  name: 'Programme',
+  currentGame: 'Programme'
+});
 
   container.innerHTML = '';
   data.matches.forEach(match => {
