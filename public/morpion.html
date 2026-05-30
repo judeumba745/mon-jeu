@@ -47,6 +47,10 @@ const matchId = urlParams.get('matchId');
 const token = urlParams.get('token');
 
 const socket = io();
+
+socket.on("connect", () => {
+  console.log("socket connecté ok")
+});
 const cells = document.querySelectorAll(".cell");
 const statusText = document.getElementById("status");
 
