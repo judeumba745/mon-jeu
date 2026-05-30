@@ -468,24 +468,7 @@ app.post('/api/tournament/join', (req, res) => {
   });
 });
 
-  const accessCode = generateAccessCode(phone);
-  const player = {
-    id: Date.now() + Math.random(),
-    name,
-    firstname,
-    phone,
-    accessCode,
-    games,
-    gameType: games[0],
-    wins: 0,
-    losses: 0,
-    eliminated: false,
-    joinedAt: Date.now(),
-    status: 'active'
-  };
-  tournament.players.push(player);
-  io.emit('dashboardUpdate');
-  res.json({ success: true, accessCode, message: `Inscrit! Ton code: ${accessCode}` });
+  
 });
 app.get('/api/programme', (req, res) => {
   res.json({
