@@ -468,8 +468,6 @@ app.post('/api/tournament/join', (req, res) => {
   });
 });
 
-  
-});
 app.get('/api/programme', (req, res) => {
   res.json({
     round: tournament.currentRound,
