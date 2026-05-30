@@ -153,13 +153,15 @@ async function inscrireTournoi() {
   msg.innerText = 'Inscription...';
 
   try {
-  const res = await fetch('/api/tournament/join', {
+ const res = await fetch('/api/tournament/join', {
   method: 'POST',
-  headers: { 
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + token
+  headers: {
+    'Content-Type': 'application/json'
   },
-  body: JSON.stringify({ games })
+  body: JSON.stringify({
+    token,
+    games
+  })
 });
 
     const data = await res.json();
