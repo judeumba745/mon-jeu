@@ -688,6 +688,37 @@ if (day === 6 || day === 0) {
   tournament.status = 'registration';
   console.log('✅ Inscriptions ouvertes automatiquement');
 }
+app.post('/api/tournament/join', async (req, res) => {
+  const auth = req.headers.authorization;
+  if(!auth) return res.status(401).json({ error: 'Non connecté' });
+
+  const token = auth.split(' ')[1];
+  const decoded = jwt.verify(token, 'secret123');
+  const user = await db.collection('users').findOne({ _id: new ObjectId(decoded.id) });
+  if(!user) return res.status(401).json({ error: 'Joueur non reconnu' });
+
+  const { games } = req.body;
+  const accessCode = Math.random().toString(36).slice(2,8).toUpperCase();
+
+  await db.collection('tournament_registrations').updateOne(
+    { userId: user._id },
+    { $setOnInsert: { userId: user._id, firstname: user.firstname, name: user.name, email: user.email, access_code: accessCode, games, created_at: new Date() } },
+    { upsert: true }
+  );
+
+  tournament.players.push({
+    id: user._id,
+    firstname: user.firstname,
+    name: user.name,
+    games,
+    gameType: games[0],
+    joinedAt: Date.now(),
+    eliminated: false
+  });
+
+  io.emit('dashboardUpdate');
+  res.json({ success: true, accessCode, message: 'Inscription réussie!' });
+}); // <- UN SEUL }); ici
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
