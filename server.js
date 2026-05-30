@@ -429,22 +429,44 @@ app.post('/api/player/register', (req, res) => {
 
 // API Tournoi inscription multi-jeux
 app.post('/api/tournament/join', (req, res) => {
-  if (tournament.status!== 'registration') {
-    return res.status(400).json({ error: 'Les inscriptions sont fermées' });
+  const { token, games } = req.body;
+
+  const player = fullGamePlayers.find(p => String(p.id) === String(token));
+
+  if (!player) {
+    return res.status(401).json({ error: "Utilisateur non reconnu" });
   }
-  const { name, firstname, phone, games } = req.body;
-  if (!name ||!firstname ||!phone) {
-    return res.status(400).json({ error: 'Nom, prénom et téléphone requis' });
+
+  if (tournament.players.find(p => String(p.id) === String(player.id))) {
+    return res.status(400).json({ error: "Déjà inscrit" });
   }
-  if (!games ||!Array.isArray(games) || games.length === 0) {
-    return res.status(400).json({ error: 'Choisis au moins 1 jeu' });
-  }
-  if (!validatePhone(phone)) {
-    return res.status(400).json({ error: 'Numéro invalide' });
-  }
-  if (tournament.players.find(p => p.phone === phone)) {
-    return res.status(400).json({ error: 'Ce numéro est déjà inscrit' });
-  }
+
+  const accessCode = generateAccessCode(player.phone || '000000');
+
+  const newPlayer = {
+    id: player.id,
+    name: player.name,
+    firstname: player.firstname,
+    phone: player.phone,
+    accessCode,
+    games,
+    gameType: games[0],
+    wins: 0,
+    losses: 0,
+    eliminated: false,
+    joinedAt: Date.now(),
+    status: 'active'
+  };
+
+  tournament.players.push(newPlayer);
+
+  io.emit('dashboardUpdate');
+
+  res.json({
+    success: true,
+    message: "Inscription automatique réussie"
+  });
+});
 
   const accessCode = generateAccessCode(phone);
   const player = {
