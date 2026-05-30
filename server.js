@@ -619,6 +619,14 @@ schedule.scheduleJob('59 23 * 0', () => {
   console.log('=== Inscriptions fermées. Tournoi lancé ===');
 });
 
+// Vérifier le jour au démarrage du serveur
+const day = new Date().getDay();
+
+if (day === 6 || day === 0) {
+  tournament.status = 'registration';
+  console.log('✅ Inscriptions ouvertes automatiquement');
+}
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Serveur sur http://localhost:${PORT}`);
