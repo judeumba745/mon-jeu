@@ -2,35 +2,28 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ECHEC</title>
+<title>Échecs</title>
 <style>
-body { background:#000; color:#fff; font-family:sans-serif; text-align:center; padding:50px; }
-h1 { color:#00ff66; }
-#board { display:grid; grid-template-columns:repeat(3,100px); gap:5px; justify-content:center; margin:30px auto; }
-.cell { width:100px; height:100px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; font-size:40px; cursor:pointer; }
+.board{
+  display:grid;
+  grid-template-columns:repeat(8,60px);
+  width:480px;
+  margin:auto;
+}
+.cell{
+  width:60px;height:60px;
+  display:flex;justify-content:center;align-items:center;
+  border:1px solid black;
+  font-size:24px;
+}
 </style>
 </head>
 <body>
-<h1>❌⭕ Morpion</h1>
-<p id="status">Chargement du match...</p>
-<div id="board"></div>
 
-<script>
-const urlParams = new URLSearchParams(window.location.search);
-const matchId = urlParams.get('matchId');
-const token = urlParams.get('token');
+<h1>Échecs</h1>
+<div id="board" class="board"></div>
 
-document.getElementById('status').textContent = `Match ${matchId} - Connecté`;
-
-// Grille vide pour tester
-const board = document.getElementById('board');
-for(let i=0; i<9; i++){
-  const cell = document.createElement('div');
-  cell.className = 'cell';
-  cell.onclick = () => cell.textContent = cell.textContent ? '' : 'X';
-  board.appendChild(cell);
-}
-</script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="echecs.js"></script>
 </body>
 </html>
