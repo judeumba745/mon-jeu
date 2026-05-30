@@ -471,6 +471,41 @@ app.get('/api/programme', (req, res) => {
     matches: tournament.matches
   });
 });
+
+app.post('/api/tournament/enter-match', (req, res) => {
+  const { token } = req.body;
+
+  const player = fullGamePlayers.find(p => String(p.id) === String(token));
+
+  if (!player) {
+    return res.json({ error: "Joueur non reconnu" });
+  }
+
+  const match = tournament.matches.find(m =>
+    (String(m.p1.id) === String(player.id) ||
+     String(m.p2.id) === String(player.id)) &&
+    !m.played
+  );
+
+  if (!match) {
+    return res.json({ error: "Aucun match pour toi" });
+  }
+
+  const now = Date.now();
+  const matchTime = new Date(match.datetime).getTime();
+
+  if (now < matchTime) {
+    return res.json({
+      error: "Ton match n'a pas encore commencé"
+    });
+  }
+
+  res.json({
+    success: true,
+    matchId: match.id,
+    gameType: match.gameType
+  });
+});
 // API Dashboard MODIFIÉE
 app.get('/api/dashboard', (req, res) => {
   const actifs = tournament.players.filter(p =>!p.eliminated).length;
