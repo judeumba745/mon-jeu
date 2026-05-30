@@ -153,14 +153,14 @@ async function inscrireTournoi() {
   msg.innerText = 'Inscription...';
 
   try {
-    const res = await fetch('/api/tournament/join', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token,
-        games
-      })
-    });
+  const res = await fetch('/api/tournament/join', {
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + token
+  },
+  body: JSON.stringify({ games })
+});
 
     const data = await res.json();
     if (res.ok) {
@@ -222,10 +222,13 @@ function afficherMesMatchs() {
 
 async function entrerMatch() {
   const res = await fetch('/api/tournament/enter-match', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ token })
-  });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + token
+  },
+  body: JSON.stringify({})
+});
 
   const data = await res.json();
   if (data.success) {
