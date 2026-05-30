@@ -311,7 +311,7 @@ io.on('connection', (socket) => {
     const match = tournament.matches.find(m => String(m.id) === String(matchId));
     if (!match || match.played) return socket.emit('error', 'Match invalide');
 
-    const player = tournament.players.find(p => p.accessCode === accessCode || String(p.id) === String(token));
+    const player = tournament.players.find(p => String(p.id) === String(token));
     if (!player || (player.id!== match.p1.id && player.id!== match.p2.id)) {
       return socket.emit('error', 'Code invalide');
     }
