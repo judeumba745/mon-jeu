@@ -157,10 +157,8 @@ async function inscrireTournoi() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: profil.name || '',
-        firstname: profil.firstname || '',
-        phone: profil.phone || '',
-        games: games
+        token,
+        games
       })
     });
 
