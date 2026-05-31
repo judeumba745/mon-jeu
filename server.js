@@ -687,7 +687,6 @@ if (day === 6 || day === 0) {
   console.log('✅ Inscriptions ouvertes automatiquement');
 }
 
-  const user = await db.collection('users').findOne({ _id: new ObjectId(decoded.id) });
   if(!user) return res.status(401).json({ error: 'Joueur non reconnu' });
 
   const { games } = req.body;
