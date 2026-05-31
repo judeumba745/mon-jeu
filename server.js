@@ -653,18 +653,6 @@ app.post('/api/auth/login', (req, res) => {
   });
 });
 
-// Vérifier le jour au démarrage du serveur
-const day = new Date().getDay();
-
-if (day === 6 || day === 0) {
-  tournament.status = 'registration';
-  console.log('✅ Inscriptions ouvertes automatiquement');
-}
-
- 
-// Samedi 00:00 : Ouverture inscriptions
-// 👉 ICI tes autres schedule déjà existants
-
 schedule.scheduleJob('0 0 * * 6', () => {
   console.log('⏰ RESET TOURNOI EN COURS');
 
