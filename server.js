@@ -44,7 +44,7 @@ try{
       console.error(err);
       res.json({ error: "Erreur" });
   }
-});
+}); 
 
 app.get('/health', (req, res) => { res.status(200).send('OK') })
 
