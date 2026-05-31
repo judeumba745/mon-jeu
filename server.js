@@ -651,7 +651,6 @@ app.post('/api/auth/login', (req, res) => {
     player,
     token: player.id
   });
-});
 
 schedule.scheduleJob('0 0 * * 6', () => {
   console.log('⏰ RESET TOURNOI EN COURS');
