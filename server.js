@@ -703,6 +703,42 @@ app.post('/api/tournament/join', async (req, res) => {
     { $setOnInsert: { userId: user._id, firstname: user.firstname, name: user.name, email: user.email, access_code: accessCode, games, created_at: new Date() } },
     { upsert: true }
   );
+// Samedi 00:00 : Ouverture inscriptions
+// 👉 ICI tes autres schedule déjà existants
+
+schedule.scheduleJob('0 0 * * 6', () => {
+  console.log('⏰ RESET TOURNOI EN COURS');
+
+  tournament = {
+    players: [],
+    matches: [],
+    status: 'registration',
+    currentRound: 0,
+    winner: null
+  };
+
+  fullGamePlayers = [];
+  accounts.clear();
+  onlineUsers.clear();
+
+  io.emit('dashboardUpdate');
+
+  console.log('✅ TOURNOI RESET TERMINÉ');
+});
+
+// Dimanche 23:59 : Fermeture + génération programme
+schedule.scheduleJob('59 23 * 0', () => {
+  if (tournament.players.length < 2) {
+    tournament.status = 'closed';
+    console.log('Pas assez de joueurs. Tournoi annulé.');
+    io.emit('dashboardUpdate');
+    return;
+  }
+  tournament.currentRound = 1;
+  genererProgramme();
+  io.emit('dashboardUpdate');
+  console.log('=== Inscriptions fermées. Tournoi lancé ===');
+});
 
   tournament.players.push({
     id: user._id,
