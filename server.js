@@ -652,32 +652,6 @@ app.post('/api/auth/login', (req, res) => {
     token: player.id
   });
 });
-// Timezone Kinshasa
-process.env.TZ = 'Africa/Kinshasa';
-
-// Samedi 00:00 : Ouverture inscriptions
-schedule.scheduleJob('0 0 * 6', () => {
-  tournament = { players: [], matches: [], status: 'registration', currentRound: 0, winner: null };
-  fullGamePlayers = [];
-  accounts.clear();
-  onlineUsers.clear();
-  io.emit('dashboardUpdate');
-  console.log('=== Inscriptions ouvertes ===');
-});
-
-// Dimanche 23:59 : Fermeture + génération programme
-schedule.scheduleJob('59 23 * 0', () => {
-  if (tournament.players.length < 2) {
-    tournament.status = 'closed';
-    console.log('Pas assez de joueurs. Tournoi annulé.');
-    io.emit('dashboardUpdate');
-    return;
-  }
-  tournament.currentRound = 1;
-  genererProgramme();
-  io.emit('dashboardUpdate');
-  console.log('=== Inscriptions fermées. Tournoi lancé ===');
-});
 
 // Vérifier le jour au démarrage du serveur
 const day = new Date().getDay();
@@ -686,9 +660,6 @@ if (day === 6 || day === 0) {
   tournament.status = 'registration';
   console.log('✅ Inscriptions ouvertes automatiquement');
 }
-
-  const { games } = req.body;
-  const accessCode = Math.random().toString(36).slice(2,8).toUpperCase();
 
  
 // Samedi 00:00 : Ouverture inscriptions
