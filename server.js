@@ -686,12 +686,7 @@ if (day === 6 || day === 0) {
   tournament.status = 'registration';
   console.log('✅ Inscriptions ouvertes automatiquement');
 }
-app.post('/api/tournament/join', async (req, res) => {
-  const auth = req.headers.authorization;
-  if(!auth) return res.status(401).json({ error: 'Non connecté' });
 
-  const token = auth.split(' ')[1];
-  const decoded = jwt.verify(token, 'secret123');
   const user = await db.collection('users').findOne({ _id: new ObjectId(decoded.id) });
   if(!user) return res.status(401).json({ error: 'Joueur non reconnu' });
 
