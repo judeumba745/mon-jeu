@@ -5,15 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Connexion - GameOnline</title>
   <link rel="stylesheet" href="/style.css">
+
+  <!-- ✅ AJOUT 1 -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- ✅ AJOUT 2 -->
+  <script>
+    const socket = io();
+  </script>
+
 </head>
+
 <body>
   <div class="container">
     <h2 class="form-title">Se connecter</h2>
+
     <div class="card-dark">
       <input id="email" type="email" placeholder="Email" required>
       <input id="password" type="password" placeholder="Mot de passe" required>
       <button onclick="login()">Se connecter</button>
+
       <div id="msg" class="msg"></div>
+
       <p style="margin-top:15px; text-align:center; color:#94a3b8;">
         Pas de compte ? <a href="/inscription.html" style="color:#00ff66;">S'inscrire</a>
       </p>
@@ -25,34 +38,45 @@ async function login() {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const msg = document.getElementById('msg');
- 
+
   if (!email || !password) {
     msg.className = 'msg error';
     msg.innerText = 'Remplis tous les champs';
     return;
   }
- 
+
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ email, password })
     });
-   
+
     const data = await res.json();
-   
+
     if (data.success) {
       localStorage.setItem('gameonline_token', data.token);
+
+      // 🔥 AJOUT IMPORTANT ICI
+      socket.emit('userOnline', {
+        playerId: data.token,
+        firstname: data.player.firstname,
+        name: data.player.name,
+        currentGame: null
+      });
+
       window.location = '/tableau.html';
     } else {
       msg.className = 'msg error';
       msg.innerText = data.error;
     }
+
   } catch (err) {
     msg.className = 'msg error';
     msg.innerText = 'Erreur serveur';
   }
 }
 </script>
+
 </body>
 </html>
