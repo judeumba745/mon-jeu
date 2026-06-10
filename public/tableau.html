@@ -27,6 +27,7 @@ body { background: #000; color: #fff; margin:0; font-family: -apple-system, Blin
 </style>
 </head>
 <body>
+
 <div class="top-nav">
   <div class="nav-icons">
     <div class="nav-item active" onclick="showTab('programme', this)">
@@ -49,6 +50,11 @@ body { background: #000; color: #fff; margin:0; font-family: -apple-system, Blin
       <span class="badge" id="badge-tournoi">0</span>
     </div>
   </div>
+</div>
+
+<!-- ✅ Bouton Déconnexion intégré -->
+<div style="padding:16px;">
+  <button class="btn" style="background:#ff3040; width:150px;" onclick="logout()">Déconnexion</button>
 </div>
 
 <div class="content">
@@ -160,7 +166,6 @@ function renderTournoi(ranking) {
   div.innerHTML = html;
 }
 
-// CORRECTION ICI
 function enterMatch(matchId, gameType) {
   let page = 'jeu.html';
   if (gameType === 'morpion') page = 'morpion.html';
@@ -177,6 +182,12 @@ function playVsAI(game) {
   if (game === 'echecs') page = 'echecs.html';
  
   location.href = `/${page}?mode=ia&game=${game}&token=${token || ''}`;
+}
+
+// ✅ Fonction Déconnexion
+function logout() {
+  localStorage.removeItem('gameonline_token');
+  window.location.href = '/login.html';
 }
 </script>
 </body>
