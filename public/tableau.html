@@ -13,7 +13,8 @@ body { background: #000; color: #fff; margin:0; font-family: -apple-system, Blin
 .nav-item.active { border-bottom: 3px solid #00ff66; }
 .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
 .nav-item span { font-size: 12px; font-weight: 600; }
-.badge { position: absolute; top: 6px; right: calc(50% - 15px); background: #ff3040; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; min-width: 16px; text-align: center; }
+/* Masquer les badges */
+.badge { display: none; }
 .content { padding: 16px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
@@ -24,6 +25,24 @@ body { background: #000; color: #fff; margin:0; font-family: -apple-system, Blin
 .game-card { background: #1a1a1a; border: 1px solid #00ff66; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 600; }
 .game-card:hover { background: #00ff66; color: #000; }
 .game-badge { font-size:11px; background:#1a1a1a; padding:3px 8px; border-radius:4px; display:inline-block; margin-bottom:8px; color:#00ff66; }
+
+/* Bouton Déconnexion fixe en bas */
+#logout-btn {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 300px;
+  background: #ff3040;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1000;
+}
 </style>
 </head>
 <body>
@@ -33,12 +52,10 @@ body { background: #000; color: #fff; margin:0; font-family: -apple-system, Blin
     <div class="nav-item active" onclick="showTab('programme', this)">
       <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
       <span>Programme</span>
-      <span class="badge" id="badge-programme">0</span>
     </div>
     <div class="nav-item" onclick="showTab('live', this)">
       <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
       <span>Live</span>
-      <span class="badge" id="badge-live">0</span>
     </div>
     <div class="nav-item" onclick="showTab('ia', this)">
       <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
@@ -47,15 +64,12 @@ body { background: #000; color: #fff; margin:0; font-family: -apple-system, Blin
     <div class="nav-item" onclick="location.href='/tournoi.html'">
       <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
       <span>Tournoi</span>
-      <span class="badge" id="badge-tournoi">0</span>
     </div>
   </div>
 </div>
 
-<!-- ✅ Bouton Déconnexion intégré -->
-<div style="padding:16px;">
-  <button class="btn" style="background:#ff3040; width:150px;" onclick="logout()">Déconnexion</button>
-</div>
+<!-- Bouton Déconnexion fixe en bas -->
+<button id="logout-btn" onclick="logout()">Déconnexion</button>
 
 <div class="content">
   <div id="tab-programme" class="tab-content active">
@@ -95,7 +109,6 @@ async function loadData() {
     if (res1.ok) {
       const data1 = await res1.json();
       renderProgramme(data1.matches);
-      document.getElementById('badge-programme').innerText = data1.matches.filter(m => !m.played).length;
     } else {
       document.getElementById('liste-programme').innerHTML = '<div class="error">Erreur API programme</div>';
     }
@@ -108,7 +121,6 @@ async function loadData() {
     if (res2.ok) {
       const data2 = await res2.json();
       renderTournoi(data2.ranking);
-      document.getElementById('badge-tournoi').innerText = data2.ranking.filter(p => !p.eliminated).length;
     } else {
       document.getElementById('liste-tournoi').innerHTML = '<div class="error">Erreur API tournoi</div>';
     }
@@ -123,14 +135,11 @@ function renderProgramme(matches) {
     div.innerHTML = '<div class="card">Aucun match programmé</div>';
     return;
   }
-
   const emojis = {dame:'♟️', morpion:'❌⭕', puissance4:'🔵', echecs:'♞'};
   let html = '';
- 
   matches.filter(m => !m.played).slice(0, 10).forEach(m => {
     const jeu = m.gameType || 'dame';
-    html += `
-      <div class="card">
+    html += `<div class="card">
         <div class="game-badge">${emojis[jeu]} ${jeu}</div>
         <div style="font-size:12px; color:#888;">Round ${m.round}</div>
         <div style="display:flex; justify-content:space-between; margin:10px 0;">
@@ -139,8 +148,7 @@ function renderProgramme(matches) {
           <span>${m.p2.firstname} ${m.p2.name}</span>
         </div>
         <button class="btn" onclick="enterMatch(${m.id}, '${jeu}')">Jouer</button>
-      </div>
-    `;
+      </div>`;
   });
   div.innerHTML = html;
 }
@@ -153,15 +161,13 @@ function renderTournoi(ranking) {
   }
   let html = '';
   ranking.slice(0, 10).forEach(p => {
-    html += `
-      <div class="card">
+    html += `<div class="card">
         <div style="display:flex; justify-content:space-between;">
           <span>${p.rank}. ${p.firstname} ${p.name}</span>
           <span>${p.wins}V - ${p.losses}D</span>
         </div>
         <div style="font-size:12px; color:${p.eliminated ? '#ff3040' : '#00ff66'};">${p.status}</div>
-      </div>
-    `;
+      </div>`;
   });
   div.innerHTML = html;
 }
@@ -171,7 +177,6 @@ function enterMatch(matchId, gameType) {
   if (gameType === 'morpion') page = 'morpion.html';
   if (gameType === 'puissance4') page = 'puissance4.html';
   if (gameType === 'echecs') page = 'echecs.html';
- 
   location.href = `/${page}?matchId=${matchId}&token=${token || ''}`;
 }
 
@@ -180,11 +185,10 @@ function playVsAI(game) {
   if (game === 'morpion') page = 'morpion.html';
   if (game === 'puissance4') page = 'puissance4.html';
   if (game === 'echecs') page = 'echecs.html';
- 
   location.href = `/${page}?mode=ia&game=${game}&token=${token || ''}`;
 }
 
-// ✅ Fonction Déconnexion
+// Fonction Déconnexion
 function logout() {
   localStorage.removeItem('gameonline_token');
   window.location.href = '/login.html';
