@@ -672,14 +672,17 @@ schedule.scheduleJob('0 0 * * 6', () => {
   console.log('✅ TOURNOI RESET TERMINÉ');
 });
 
-// Dimanche 23:59 : Fermeture + génération programme
-schedule.scheduleJob('59 23 * 0', () => {
+schedule.scheduleJob({ hour: 23, minute: 59, dayOfWeek: 0, tz: 'Africa/Kinshasa' }, () => {
+  // 🔹 Ajoute ici pour debug
+  console.log('Players inscrits avant lancement tournoi:', tournament.players.length);
+
   if (tournament.players.length < 2) {
     tournament.status = 'closed';
     console.log('Pas assez de joueurs. Tournoi annulé.');
     io.emit('dashboardUpdate');
     return;
   }
+
   tournament.currentRound = 1;
   genererProgramme();
   io.emit('dashboardUpdate');
