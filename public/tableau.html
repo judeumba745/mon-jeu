@@ -188,10 +188,13 @@ function playVsAI(game) {
   location.href = `/${page}?mode=ia&game=${game}&token=${token || ''}`;
 }
 
+
 // Fonction Déconnexion
 function logout() {
+  // Supprime le token
   localStorage.removeItem('gameonline_token');
-  window.location.href = '/login.html';
+  // Redirige vers la page principale (index.html)
+  window.location.href = '/index.html';
 }
 </script>
 </body>
