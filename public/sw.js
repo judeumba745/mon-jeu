@@ -7,7 +7,7 @@ const FILES_TO_CACHE = [
   '/tournoi.html',
   '/style.css',
   '/app.js'
-];
+]; 
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_STATIC).then(c => c.addAll(FILES_TO_CACHE)));
