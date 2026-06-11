@@ -174,7 +174,7 @@ function renderTournoi(ranking) {
 
 function enterMatch(matchId, gameType) {
   let page = 'jeu.html';
-  if (gameType === 'morpion') page = 'morpion.html';
+  if (gameType === 'morpion') page = 'jeu2.html';
   if (gameType === 'puissance4') page = 'puissance4.html';
   if (gameType === 'echecs') page = 'echecs.html';
   location.href = `/${page}?matchId=${matchId}&token=${token || ''}`;
@@ -182,7 +182,7 @@ function enterMatch(matchId, gameType) {
 
 function playVsAI(game) {
   let page = 'jeu.html';
-  if (game === 'morpion') page = 'morpion.html';
+  if (game === 'morpion') page = 'jeu2.html';
   if (game === 'puissance4') page = 'puissance4.html';
   if (game === 'echecs') page = 'echecs.html';
   location.href = `/${page}?mode=ia&game=${game}&token=${token || ''}`;
