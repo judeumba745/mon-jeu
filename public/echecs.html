@@ -8,21 +8,23 @@
 body {font-family: Arial; display: flex; flex-direction: column; align-items: center; background: #2c3e50; color: white; margin: 0; padding: 20px;}
 h1 {color: #ecf0f1;}
 #board {display: grid; grid-template-columns: repeat(8, 50px); border: 3px solid #34495e;}
-.square {width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 35px; cursor: pointer;}
+.square {width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 35px; cursor: pointer; user-select: none;}
 .white {background: #ecf0f1;}
 .black {background: #34495e;}
 .selected {background: #f1c40f!important;}
-#status {margin: 20px; font-size: 18px;}
+.possible {background: #2ecc71!important;}
+#status {margin: 20px; font-size: 18px; font-weight: bold;}
 button {padding: 10px 20px; background: #3498db; border: none; border-radius: 5px; cursor: pointer; color: white; margin-top: 10px;}
 a {color: #1abc9c; margin-top: 15px;}
 </style>
 </head>
 <body>
-<h1>Échecs Simplifiés</h1>
-<div id="status">Tour: Blancs</div>
+<h1>Échecs</h1>
+<div id="status">Chargement...</div>
 <div id="board"></div>
 <button onclick="reset()">Recommencer</button>
-<a href="puissance.html">← Retour Puissance 4</a>
+<a href="index.html">← Menu</a>
+<script src="/socket.io/socket.io.js"></script>
 <script src="echecs.js"></script>
 </body>
 </html>
