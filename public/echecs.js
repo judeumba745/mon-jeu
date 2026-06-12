@@ -1,6 +1,3 @@
-const urlParams = new URLSearchParams(window.location.search);
-const mode = urlParams.get('mode'); // 'ia' ou 'online'
-
 let board = [
   ['r','n','b','q','k','b','n','r'],
   ['p','p','p','p','p','p','p','p'],
@@ -14,6 +11,7 @@ let board = [
 
 let turn = 'w'; // w=blanc=toi, b=noir=IA/adversaire
 let selected = null;
+let mode = null;
 let myColor = 'w';
 let socket = null;
 let possibleMoves = [];
@@ -21,25 +19,37 @@ let possibleMoves = [];
 const pieces = {r:'♜',n:'♞',b:'♝',q:'♛',k:'♚',p:'♟',R:'♖',N:'♘',B:'♗',Q:'♕',K:'♔',P:'♙'};
 const boardDiv = document.getElementById('board');
 const statusDiv = document.getElementById('status');
+const menuDiv = document.getElementById('menu');
+const resetBtn = document.getElementById('resetBtn');
 
-// MODE ONLINE
-if(mode === 'online') {
-  socket = io();
-  statusDiv.textContent = 'Recherche adversaire...';
+// FONCTION MENU
+function startGame(selectedMode) {
+  mode = selectedMode;
+  menuDiv.style.display = 'none';
+  resetBtn.style.display = 'block';
 
-  socket.on('startChess', (data) => {
-    myColor = data.color;
-    turn = 'w';
-    statusDiv.textContent = `Tour: ${turn === myColor? 'Toi' : 'Adversaire'}`;
-  });
+  if(mode === 'online') {
+    socket = io();
+    statusDiv.textContent = 'Recherche adversaire...';
 
-  socket.on('moveChess', (data) => {
-    board[data.to.r][data.to.c] = board[data.from.r][data.from.c];
-    board[data.from.r][data.from.c] = 0;
-    turn = turn === 'w'? 'b' : 'w';
-    selected = null;
-    draw();
-  });
+    socket.on('startChess', (data) => {
+      myColor = data.color;
+      turn = 'w';
+      statusDiv.textContent = `Tu es ${myColor === 'w'? 'Blancs' : 'Noirs'}. Tour: ${turn === myColor? 'Toi' : 'Adversaire'}`;
+    });
+
+    socket.on('moveChess', (data) => {
+      board[data.to.r][data.to.c] = board[data.from.r][data.from.c];
+      board[data.from.r][data.from.c] = 0;
+      turn = turn === 'w'? 'b' : 'w';
+      selected = null;
+      possibleMoves = [];
+      draw();
+    });
+  } else {
+    statusDiv.textContent = 'Tour: Blancs. Tu commences!';
+  }
+  reset();
 }
 
 draw();
@@ -61,7 +71,7 @@ function draw() {
       boardDiv.appendChild(sq);
     }
   }
-  statusDiv.textContent = `Tour: ${turn === 'w'? 'Blancs' : 'Noirs'} ${turn === myColor? '(Toi)' : ''}`;
+  if(mode!== 'online') statusDiv.textContent = `Tour: ${turn === 'w'? 'Blancs' : 'Noirs'}`;
 }
 
 function click(r, c) {
@@ -71,7 +81,7 @@ function click(r, c) {
   const isWhite = piece && piece === piece.toUpperCase();
 
   if(selected) {
-    // Déplacer
+    // Déplacer si coup légal
     if(possibleMoves.some(m => m.r == r && m.c == c)) {
       const from = selected;
       board[r][c] = board[from.r][from.c];
@@ -94,35 +104,29 @@ function click(r, c) {
   draw();
 }
 
-// Mouvements simplifiés - sans échec/roque
+// Mouvements simplifiés
 function getMoves(r, c, piece) {
   const moves = [];
   const isWhite = piece === piece.toUpperCase();
   const type = piece.toLowerCase();
   const dir = isWhite? -1 : 1;
 
-  if(type === 'p') { // Pion
+  if(type === 'p') {
     if(r+dir >= 0 && r+dir < 8 &&!board[r+dir][c]) moves.push({r:r+dir, c});
-    if(r+dir >= 0 && r+dir < 8 && c-1 >= 0 && board[r+dir][c-1] && (isWhite?!board[r+dir][c-1].toUpperCase() === board[r+dir][c-1] : board[r+dir][c-1].toUpperCase() === board[r+dir][c-1])) moves.push({r:r+dir, c:c-1});
-    if(r+dir >= 0 && r+dir < 8 && c+1 < 8 && board[r+dir][c+1] && (isWhite?!board[r+dir][c+1].toUpperCase() === board[r+dir][c+1] : board[r+dir][c+1].toUpperCase() === board[r+dir][c+1])) moves.push({r:r+dir, c:c+1});
-  }
-  if(type === 'r' || type === 'q') { // Tour + Dame
-    for(let d of [[1,0],[-1,0],[0,1],[0,-1]]) slide(r,c,d[0],d[1],moves,isWhite);
-  }
-  if(type === 'b' || type === 'q') { // Fou + Dame
-    for(let d of [[1,1],[-1,1],[1,-1],[-1,-1]]) slide(r,c,d[0],d[1],moves,isWhite);
-  }
-  if(type === 'n') { // Cavalier
-    for(let d of [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]) {
-      let nr=r+d[0], nc=c+d[1];
-      if(nr>=0 && nr<8 && nc>=0 && nc<8 && (!board[nr][nc] || isWhite?!board[nr][nc].toUpperCase() === board[nr][nc] : board[nr][nc].toUpperCase() === board[nr][nc])) moves.push({r:nr,c:nc});
+    if(r+dir >= 0 && r+dir < 8 && c-1 >= 0 && board[r+dir][c-1] && isWhite?!board[r+dir][c-1].toUpperCase() === board[r+dir][c-1] : board[r+dir][c+1] &&!board[r+dir][c+1].toUpperCase() === board[r+dir][c+1]) {
+      if(c-1 >= 0 && board[r+dir][c-1]) moves.push({r:r+dir, c:c-1});
+      if(c+1 < 8 && board[r+dir][c+1]) moves.push({r:r+dir, c:c+1});
     }
   }
-  if(type === 'k') { // Roi
-    for(let dr=-1; dr<=1; dr++) for(let dc=-1; dc<=1; dc++) {
-      let nr=r+dr, nc=c+dc;
-      if(nr>=0 && nr<8 && nc>=0 && nc<8 && (!board[nr][nc] || isWhite?!board[nr][nc].toUpperCase() === board[nr][nc] : board[nr][nc].toUpperCase() === board[nr][nc])) moves.push({r:nr,c:nc});
-    }
+  if(type === 'r' || type === 'q') for(let d of [[1,0],[-1,0],[0,1],[0,-1]]) slide(r,c,d[0],d[1],moves,isWhite);
+  if(type === 'b' || type === 'q') for(let d of [[1,1],[-1,1],[1,-1],[-1,-1]]) slide(r,c,d[0],d[1],moves,isWhite);
+  if(type === 'n') for(let d of [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]) {
+    let nr=r+d[0], nc=c+d[1];
+    if(nr>=0 && nr<8 && nc>=0 && nc<8 && (!board[nr][nc] || isWhite?!board[nr][nc].toUpperCase() === board[nr][nc] : board[nr][nc].toUpperCase() === board[nr][nc])) moves.push({r:nr,c:nc});
+  }
+  if(type === 'k') for(let dr=-1; dr<=1; dr++) for(let dc=-1; dc<=1; dc++) {
+    let nr=r+dr, nc=c+dc;
+    if(nr>=0 && nr<8 && nc>=0 && nc<8 && (!board[nr][nc] || isWhite?!board[nr][nc].toUpperCase() === board[nr][nc] : board[nr][nc].toUpperCase() === board[nr][nc])) moves.push({r:nr,c:nc});
   }
   return moves;
 }
@@ -139,9 +143,9 @@ function slide(r,c,dr,dc,moves,isWhite) {
   }
 }
 
-// IA niveau débutant - joue coup random parmi légaux
+// IA ÉCHECS - joue coup random mais légal
 function iaPlay() {
-  if(turn!== 'b') return;
+  if(turn!== 'b' || mode!== 'ia') return;
 
   let allMoves = [];
   for(let r=0; r<8; r++) for(let c=0; c<8; c++) {
@@ -156,7 +160,10 @@ function iaPlay() {
     board[move.to.r][move.to.c] = board[move.from.r][move.from.c];
     board[move.from.r][move.from.c] = 0;
     turn = 'w';
+    statusDiv.textContent = 'Tour: Blancs';
   }
+  selected = null;
+  possibleMoves = [];
   draw();
 }
 
@@ -174,5 +181,6 @@ function reset() {
   turn = 'w';
   selected = null;
   possibleMoves = [];
+  if(mode!== 'online') statusDiv.textContent = 'Tour: Blancs';
   draw();
 }
