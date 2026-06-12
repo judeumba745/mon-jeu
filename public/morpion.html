@@ -1,50 +1,37 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Morpion - IA & Multijoueur</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #f0f0f0;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 { text-align: center; }
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-template-rows: repeat(3, 100px);
-      gap: 5px;
-      margin-top: 20px;
-    }
-    .cell {
-      background: #fff;
-      border: 2px solid #333;
-      font-size: 3em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    button { margin: 10px; padding: 10px 20px; font-size: 1em; }
-    #status { margin-top: 20px; font-size: 1.2em; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morpion</title>
+<style>
+body {font-family: Arial; display: flex; flex-direction: column; align-items: center; background: #0f4c75; color: white; margin: 0; padding: 20px;}
+h1 {color: #bbe1fa;}
+#board {display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; background: #3282b8; padding: 5px; border-radius: 10px; margin-top: 20px;}
+.cell {width: 100px; height: 100px; background: #1b262c; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: bold; cursor: pointer; border-radius: 5px;}
+.cell:hover {background: #2c3e50;}
+.x {color: #ff6b6b;}
+.o {color: #4ecdc4;}
+#status {margin: 20px; font-size: 22px; font-weight: bold; text-align: center;}
+button {padding: 12px 25px; background: #3282b8; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; margin: 5px;}
+.menu {margin-bottom: 10px;}
+a {color: #bbe1fa; margin-top: 15px;}
+</style>
 </head>
 <body>
-  <h1>Morpion</h1>
-  <div>
-    <button id="playAI">Jouer contre IA</button>
-    <button id="playOnline">Jouer en ligne</button>
-  </div>
-  <div class="board" id="board"></div>
-  <div id="status"></div>
+<h1>Morpion</h1>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="jeu2.js"></script>
+<div class="menu" id="menu">
+  <button onclick="startGame('ia')">1. Morpion vs IA</button>
+  <button onclick="startGame('online')">2. Tournoi En Ligne</button>
+</div>
+
+<div id="status">Choisis un mode</div>
+<div id="board"></div>
+<button onclick="reset()" id="resetBtn" style="display:none;">Recommencer</button>
+<a href="index.html">← Menu Principal</a>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="morpion.js"></script>
 </body>
 </html>
