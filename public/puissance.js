@@ -1,17 +1,17 @@
-const urlParams = new URLSearchParams(window.location.search);
-const mode = urlParams.get('mode'); // 'ia' ou 'online'
-
 const rows = 6, cols = 7;
 let board = Array(rows).fill().map(() => Array(cols).fill(0));
-let currentPlayer = 1; // 1=Rouge=toi, 2=Jaune=IA ou adversaire
+let currentPlayer = 1; // 1=Rouge=toi, 2=Jaune=IA/adversaire
 let gameOver = false;
-let myColor = 1;
+let mode = null;
 let socket = null;
+let myColor = 1;
 
 const boardDiv = document.getElementById('board');
 const statusDiv = document.getElementById('status');
+const menuDiv = document.getElementById('menu');
+const resetBtn = document.getElementById('resetBtn');
 
-// Créer plateau
+// Créer plateau 6x7
 for(let r = 0; r < rows; r++) {
   for(let c = 0; c < cols; c++) {
     const cell = document.createElement('div');
@@ -22,32 +22,41 @@ for(let r = 0; r < rows; r++) {
   }
 }
 
-// MODE ONLINE avec Socket.io
-if(mode === 'online') {
-  socket = io();
-  statusDiv.textContent = 'Recherche adversaire...';
+// FONCTION MENU
+function startGame(selectedMode) {
+  mode = selectedMode;
+  menuDiv.style.display = 'none';
+  resetBtn.style.display = 'block';
 
-  socket.on('start', (data) => {
-    myColor = data.color;
-    currentPlayer = 1;
-    statusDiv.textContent = `Tour: ${currentPlayer === myColor? 'Toi' : 'Adversaire'}`;
-  });
+  if(mode === 'online') {
+    socket = io();
+    statusDiv.textContent = 'Recherche adversaire...';
 
-  socket.on('move', (data) => {
-    board[data.row][data.col] = data.player;
-    updateBoard();
-    currentPlayer = currentPlayer === 1? 2 : 1;
-    if(!checkWin(data.row, data.col)) {
-      statusDiv.textContent = `Tour: ${currentPlayer === myColor? 'Toi' : 'Adversaire'}`;
-    }
-  });
+    socket.on('start', (data) => {
+      myColor = data.color;
+      currentPlayer = 1;
+      statusDiv.textContent = `Tu es ${myColor === 1? 'Rouge' : 'Jaune'}. Tour: ${currentPlayer === myColor? 'Toi' : 'Adversaire'}`;
+    });
 
-  socket.on('win', (data) => {
-    statusDiv.textContent = data.player === myColor? 'Tu as gagné!' : 'Tu as perdu!';
-    gameOver = true;
-  });
+    socket.on('move', (data) => {
+      board[data.row][data.col] = data.player;
+      updateBoard();
+      currentPlayer = currentPlayer === 1? 2 : 1;
+      if(!gameOver) statusDiv.textContent = `Tour: ${currentPlayer === myColor? 'Toi' : 'Adversaire'}`;
+    });
+
+    socket.on('win', (data) => {
+      statusDiv.textContent = data.player === myColor? 'Tu as gagné!' : 'Tu as perdu!';
+      gameOver = true;
+    });
+  } else {
+    // MODE IA
+    statusDiv.textContent = 'Tour: Rouge. Tu commences!';
+  }
+  reset();
 }
 
+// JOUER
 function play(col) {
   if(gameOver) return;
   if(mode === 'online' && currentPlayer!== myColor) return;
@@ -58,7 +67,7 @@ function play(col) {
       updateBoard();
 
       if(checkWin(r, col)) {
-        statusDiv.textContent = `Victoire ${currentPlayer === 1? 'Rouge' : 'Jaune'}!`;
+        statusDiv.textContent = mode === 'ia'? (currentPlayer === 1? 'Tu as gagné!' : 'IA a gagné!') : `Victoire ${currentPlayer === 1? 'Rouge' : 'Jaune'}!`;
         gameOver = true;
         if(mode === 'online') socket.emit('win', {player: currentPlayer});
         return;
@@ -70,38 +79,42 @@ function play(col) {
         return;
       }
 
+      // Si mode online, envoie le coup
       if(mode === 'online') {
         socket.emit('move', {row: r, col: col, player: currentPlayer});
-      } else if(mode === 'ia' && currentPlayer === 1) {
-        // Tour de l'IA
-        currentPlayer = 2;
+      }
+
+      // Change de joueur
+      currentPlayer = currentPlayer === 1? 2 : 1;
+
+      // Si mode IA et c'est le tour de l'IA
+      if(mode === 'ia' && currentPlayer === 2) {
         statusDiv.textContent = 'IA réfléchit...';
-        setTimeout(iaPlay, 500);
+        setTimeout(iaPlay, 600); // IA joue après 0.6s
         return;
       }
 
-      currentPlayer = currentPlayer === 1? 2 : 1;
       statusDiv.textContent = `Tour: ${currentPlayer === 1? 'Rouge' : 'Jaune'}`;
       return;
     }
   }
 }
 
-// IA simple mais forte
+// IA QUI JOUE POUR DE VRAI
 function iaPlay() {
   if(gameOver) return;
 
-  // 1. Gagner si possible
+  // 1. IA gagne si possible
   for(let c = 0; c < cols; c++) {
     let r = getLowestRow(c);
     if(r!== -1) {
       board[r][c] = 2;
-      if(checkWin(r, c)) {updateBoard(); gameOver = true; statusDiv.textContent = 'IA gagne!'; return;}
+      if(checkWin(r, c)) {updateBoard(); gameOver = true; statusDiv.textContent = 'IA a gagné!'; return;}
       board[r][c] = 0;
     }
   }
 
-  // 2. Bloquer joueur
+  // 2. Bloque toi si tu vas gagner
   for(let c = 0; c < cols; c++) {
     let r = getLowestRow(c);
     if(r!== -1) {
@@ -111,11 +124,21 @@ function iaPlay() {
     }
   }
 
-  // 3. Jouer centre sinon random
-  let col = [3,2,4,1,5,0,6].find(c => getLowestRow(c)!== -1) || Math.floor(Math.random()*7);
+  // 3. Joue au centre sinon random
+  let colsOrder = [3,2,4,1,5,0,6];
+  let col = colsOrder.find(c => getLowestRow(c)!== -1);
+  if(col === undefined) col = Math.floor(Math.random()*7);
+
   let r = getLowestRow(col);
   board[r][col] = 2;
   updateBoard();
+
+  if(checkWin(r, col)) {
+    gameOver = true;
+    statusDiv.textContent = 'IA a gagné!';
+    return;
+  }
+
   currentPlayer = 1;
   statusDiv.textContent = 'Tour: Rouge';
 }
@@ -126,9 +149,9 @@ function getLowestRow(col) {
 }
 
 function updateBoard() {
-  document.querySelectorAll('.cell').forEach(cell => {
-    const r = Array.from(boardDiv.children).indexOf(cell) / cols | 0;
-    const c = cell.dataset.col;
+  document.querySelectorAll('.cell').forEach((cell, i) => {
+    const r = Math.floor(i / cols);
+    const c = i % cols;
     cell.className = 'cell';
     if(board[r][c] === 1) cell.classList.add('rouge');
     if(board[r][c] === 2) cell.classList.add('jaune');
@@ -145,4 +168,12 @@ function checkWin(r, c) {
     if(count >= 4) return true;
   }
   return false;
+}
+
+function reset() {
+  board = Array(rows).fill().map(() => Array(cols).fill(0));
+  currentPlayer = 1;
+  gameOver = false;
+  if(mode!== 'online') statusDiv.textContent = 'Tour: Rouge';
+  updateBoard();
 }
