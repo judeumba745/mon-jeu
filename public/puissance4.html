@@ -7,21 +7,31 @@
 <style>
 body {font-family: Arial; display: flex; flex-direction: column; align-items: center; background: #1a1a2e; color: white; margin: 0; padding: 20px;}
 h1 {color: #f39c12;}
-#board {display: grid; grid-template-columns: repeat(7, 60px); gap: 5px; background: #0f3460; padding: 10px; border-radius: 10px;}
-.cell {width: 60px; height: 60px; background: #16213e; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+#board {display: grid; grid-template-columns: repeat(7, 60px); gap: 5px; background: #0f3460; padding: 10px; border-radius: 10px; margin-top: 10px;}
+.cell {width: 60px; height: 60px; background: #16213e; border-radius: 50%; cursor: pointer; transition: 0.2s;}
+.cell:hover {filter: brightness(1.2);}
 .cell.rouge {background: radial-gradient(circle, #ff4757, #c0392b);}
 .cell.jaune {background: radial-gradient(circle, #ffdd59, #f1c40f);}
-#status {margin: 20px; font-size: 20px; font-weight: bold;}
-button {padding: 10px 20px; background: #f39c12; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px;}
+#status {margin: 20px; font-size: 20px; font-weight: bold; text-align: center;}
+button {padding: 10px 20px; background: #f39c12; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px;}
+.menu {margin-bottom: 20px;}
 a {color: #3498db; margin-top: 15px;}
 </style>
 </head>
 <body>
 <h1>Puissance 4</h1>
-<div id="status">Tour: Rouge</div>
+
+<div class="menu" id="menu">
+  <button onclick="startGame('ia')">1. Jouer vs IA</button>
+  <button onclick="startGame('online')">2. Tournoi En Ligne</button>
+</div>
+
+<div id="status">Choisis un mode</div>
 <div id="board"></div>
-<button onclick="reset()">Recommencer</button>
+<button onclick="reset()" id="resetBtn" style="display:none;">Recommencer</button>
 <a href="echecs.html">Jouer aux Échecs →</a>
+
+<script src="/socket.io/socket.io.js"></script>
 <script src="puissance.js"></script>
 </body>
 </html>
