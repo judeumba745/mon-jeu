@@ -4,15 +4,38 @@
 <meta charset="UTF-8">
 <title>Échecs</title>
 <style>
-body { background: #0a0a0a; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-#mode-badge { padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; background: #1e3a8a; }
+body { background: #0a0a0a; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
+#mode-badge { padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; background: #1e40af; color: #93c5fd; }
 #status { font-size: 20px; margin: 15px 0; }
-#plateau { display: grid; grid-template-columns: repeat(8, 60px); background: #d4af37; padding: 5px; border-radius: 10px; }
-.case { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 40px; cursor: pointer; }
-.case.noir { background: #111; }
-.case.blanc { background: #f5f5f5; color: #000; }
-.case.selected { outline: 3px solid #facc15; }
-#gameOver { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; z-index: 100; }
+#plateau {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    border: 4px solid #d4af37;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px auto;
+}
+.case {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    cursor: pointer;
+    user-select: none;
+}
+.case.blanc { background: #f0d9b5; }
+.case.noir { background: #b58863; }
+.case.selected { outline: 4px solid #facc15; outline-offset: -4px; }
+#gameOver {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); display: none; align-items: center;
+    justify-content: center; font-size: 40px; font-weight: bold; z-index: 100;
+    flex-direction: column;
+}
+button { padding: 15px 30px; font-size: 20px; margin-top: 20px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -20,6 +43,134 @@ body { background: #0a0a0a; color: #fff; display: flex; flex-direction: column; 
 <div id="status">Tour des Blancs</div>
 <div id="plateau"></div>
 <div id="gameOver"></div>
-<script src="echecs.js"></script>
+
+<script>
+const pieces = {
+    'r':'♜','n':'♞','b':'♝','q':'♛','k':'♚','p':'♟',
+    'R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','P':'♙'
+};
+
+let board = [
+    'R','N','B','Q','K','B','N','R',  // Blancs ligne 0 = en bas visuellement
+    'P','P','P','P','P','P','P','P',
+    '','','','',
+    '','','','',
+    '','','','',
+    '','','','',
+    'p','p','p','p','p','p','p','p',
+    'r','n','b','q','k','b','n','r'   // Noirs ligne 7 = en haut
+];
+
+let tour = "blanc";
+let selected = null;
+let gameOver = false;
+const plateau = document.getElementById("plateau");
+
+// Créer les 64 cases - script après div donc plateau existe
+for(let i = 0; i < 64; i++) {
+    const cell = document.createElement("div");
+    cell.classList.add("case");
+    cell.classList.add((Math.floor(i/8) + i%8) % 2 === 0? "blanc" : "noir");
+    cell.dataset.index = i;
+    if(board[i]) cell.innerText = pieces[board[i]];
+    cell.onclick = () => click(i, cell);
+    plateau.appendChild(cell);
+}
+
+function click(index, cell) {
+    if(gameOver || tour!== "blanc") return;
+
+    if(selected === null && board[index] && board[index] === board[index].toUpperCase()) {
+        selected = index;
+        cell.classList.add("selected");
+        return;
+    }
+
+    if(selected!== null) {
+        document.querySelector(".selected")?.classList.remove("selected");
+        if(isValidMove(selected, index)) {
+            board[index] = board[selected];
+            board[selected] = "";
+            updateBoard();
+
+            if(checkMate("noir")) return endGame("Tu as gagné!");
+
+            tour = "noir";
+            document.getElementById("status").innerText = "IA réfléchit...";
+            setTimeout(aiPlay, 600);
+        }
+        selected = null;
+    }
+}
+
+function aiPlay() {
+    let moves = getAllMoves("noir");
+    if(moves.length === 0) return endGame("Tu as gagné!");
+
+    let captures = moves.filter(m => board[m.to] && board[m.to] === board[m.to].toUpperCase());
+    let move = captures.length > 0
+      ? captures[Math.floor(Math.random() * captures.length)]
+        : moves[Math.floor(Math.random() * moves.length)];
+
+    board[move.to] = board[move.from];
+    board[move.from] = "";
+    updateBoard();
+
+    if(checkMate("blanc")) return endGame("IA a gagné!");
+    tour = "blanc";
+    document.getElementById("status").innerText = "Ton tour";
+}
+
+function getAllMoves(color) {
+    let moves = [];
+    for(let i = 0; i < 64; i++) {
+        if(board[i] && ((color === "blanc" && board[i] === board[i].toUpperCase()) || (color === "noir" && board[i] === board[i].toLowerCase()))) {
+            for(let j = 0; j < 64; j++) if(isValidMove(i, j)) moves.push({from: i, to: j});
+        }
+    }
+    return moves;
+}
+
+function isValidMove(from, to) {
+    if(!board[from]) return false;
+    const piece = board[from].toLowerCase();
+    const fx = from % 8, fy = Math.floor(from/8);
+    const tx = to % 8, ty = Math.floor(to/8);
+    const dx = tx - fx, dy = ty - fy;
+
+    if(board[to] && ((board[from] === board[from].toUpperCase()) === (board[to] === board[to].toUpperCase()))) return false;
+
+    if(piece === 'p') {
+        let dir = board[from] === 'P'? -1 : 1;
+        if(dx === 0 && dy === dir && board[to] === "") return true;
+        if(Math.abs(dx) === 1 && dy === dir && board[to] && board[to]!== board[to].toUpperCase()) return true;
+        return false;
+    }
+    if(piece === 'r') return dx === 0 || dy === 0;
+    if(piece === 'n') return (Math.abs(dx) === 2 && Math.abs(dy) === 1) || (Math.abs(dx) === 1 && Math.abs(dy) === 2);
+    if(piece === 'b') return Math.abs(dx) === Math.abs(dy);
+    if(piece === 'q') return dx === 0 || dy === 0 || Math.abs(dx) === Math.abs(dy);
+    if(piece === 'k') return Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
+    return false;
+}
+
+function checkMate(color) {
+    const king = color === "blanc"? 'K' : 'k';
+    return!board.includes(king);
+}
+
+function updateBoard() {
+    document.querySelectorAll(".case").forEach((cell, i) => {
+        cell.innerText = board[i]? pieces[board[i]] : "";
+    });
+}
+
+function endGame(msg) {
+    gameOver = true;
+    document.getElementById("gameOver").innerHTML = `🎉 ${msg}<br><button onclick="location.reload()">Rejouer</button>`;
+    document.getElementById("gameOver").style.display = "flex";
+    document.getElementById("status").innerText = "Partie terminée";
+}
+</script>
 </body>
 </html>
