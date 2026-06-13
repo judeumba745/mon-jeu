@@ -24,21 +24,23 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
- 
-  // API et HTML : Network First
-  if (url.pathname.startsWith('/api/') || e.request.mode === 'navigate') {
+
+  // API = toujours internet
+  if (e.request.url.includes('/api/')) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+
+  // navigation (ouvrir le site)
+  if (e.request.mode === 'navigate') {
     e.respondWith(
-      fetch(e.request).then(res => {
-        const clone = res.clone();
-        caches.open(CACHE_API).then(c => c.put(e.request, clone));
-        return res;
-      }).catch(() => caches.match(e.request))
+      fetch(e.request)
+        .catch(() => caches.match('/index.html'))
     );
     return;
   }
 
-  // CSS, JS, images : Cache First
+  // fichiers (css, js, images)
   e.respondWith(
     caches.match(e.request).then(res => res || fetch(e.request))
   );
