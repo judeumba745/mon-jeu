@@ -7,6 +7,8 @@ const crypto = require('crypto');
 
 const { Pool } = require('pg');
 
+const FORCE_OPEN = false;
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
@@ -101,10 +103,12 @@ function timeAgo(timestamp) {
 }
 
 function inscriptionOuverte() {
-  const now = new Date();
-  const day = now.getDay(); // 0 = dimanche, 6 = samedi
+ const day = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Africa/Kinshasa",
+    weekday: "long"
+  }).format(new Date()).toLowerCase();
 
-  return day === 6 || day === 0;
+  return day === "samedi" || day === "dimanche";
 }
 // Plateau Dame vide
 function createInitialBoard() {
@@ -441,11 +445,6 @@ app.post('/api/tournament/join', (req, res) => {
   });
 }
 
-if (tournament.status !== "registration") {
-  return res.status(403).json({
-    error: "Les inscriptions sont fermées."
-  });
-}
   const { token, games } = req.body;
 
   const player = fullGamePlayers.find(p => String(p.id) === String(token));
