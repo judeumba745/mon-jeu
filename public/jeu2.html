@@ -5,33 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Morpion</title>
 <style>
-body {font-family: Arial; display: flex; flex-direction: column; align-items: center; background: #0f4c75; color: white; margin: 0; padding: 20px;}
-h1 {color: #bbe1fa;}
-#board {display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; background: #3282b8; padding: 5px; border-radius: 10px; margin-top: 20px;}
-.cell {width: 100px; height: 100px; background: #1b262c; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: bold; cursor: pointer; border-radius: 5px;}
-.cell:hover {background: #2c3e50;}
-.x {color: #ff6b6b;}
-.o {color: #4ecdc4;}
-#status {margin: 20px; font-size: 22px; font-weight: bold; text-align: center;}
-button {padding: 12px 25px; background: #3282b8; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; margin: 5px;}
-.menu {margin-bottom: 10px;}
-a {color: #bbe1fa; margin-top: 15px;}
+body { background: #0a0a0a; color: #fff; font-family: Arial; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+#mode-badge { padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; background: #1e40af; }
+#status { font-size: 20px; margin: 15px 0; }
+#plateau { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; background: #d4af37; padding: 5px; border-radius: 10px; }
+.case { width: 100px; height: 100px; background: #111; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: bold; cursor: pointer; }
+.case:hover { background: #222; }
+#gameOver { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; z-index: 100; }
 </style>
 </head>
 <body>
-<h1>Morpion</h1>
-
-<div class="menu" id="menu">
-  <button onclick="startGame('ia')">1. Morpion vs IA</button>
-  <button onclick="startGame('online')">2. Tournoi En Ligne</button>
-</div>
-
-<div id="status">Choisis un mode</div>
-<div id="board"></div>
-<button onclick="reset()" id="resetBtn" style="display:none;">Recommencer</button>
-<a href="index.html">← Menu Principal</a>
-
-<script src="/socket.io/socket.io.js"></script>
+<div id="mode-badge">Mode : Morpion</div>
+<div id="status">Tour de X</div>
+<div id="plateau"></div>
+<div id="gameOver"></div>
 <script src="morpion.js"></script>
 </body>
 </html>
