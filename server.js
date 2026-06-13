@@ -622,6 +622,13 @@ app.post('/api/auth/register', (req, res) => {
 
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;
+  res.json({
+  success: true,
+  player,
+  token: player.id
+});
+
+});
 
   if (!accounts.has(email)) {
     return res.status(404).json({
