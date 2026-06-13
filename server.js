@@ -670,41 +670,6 @@ app.post('/api/auth/login', (req, res) => {
   });
 });
 
-  if (!accounts.has(email)) {
-    return res.status(404).json({
-      error: "Vous n'avez pas de compte GameOnline"
-    });
-  }
-
-  const account = accounts.get(email);
-
-  const passwordHash = crypto
-    .createHash('sha256')
-    .update(password)
-    .digest('hex');
-
-  if (account.passwordHash !== passwordHash) {
-    return res.status(403).json({
-      error: 'Mot de passe incorrect'
-    });
-  }
-
-  const player = fullGamePlayers.find(
-    p => p.id === account.playerId
-  );
-
-  if (!player) {
-    return res.status(404).json({
-      error: 'Profil introuvable'
-    });
-  }
-
-  res.json({
-    success: true,
-    player,
-    token: player.id
-  });
-
 
 // Ouvre les inscriptions samedi 00h00
 schedule.scheduleJob(
