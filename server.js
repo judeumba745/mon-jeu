@@ -100,6 +100,12 @@ function timeAgo(timestamp) {
   return `Il y a ${Math.floor(h/24)}j`;
 }
 
+function inscriptionOuverte() {
+  const now = new Date();
+  const day = now.getDay(); // 0 = dimanche, 6 = samedi
+
+  return day === 6 || day === 0;
+}
 // Plateau Dame vide
 function createInitialBoard() {
   let board = [];
@@ -652,56 +658,49 @@ app.post('/api/auth/login', (req, res) => {
     token: player.id
   });
 
-schedule.scheduleJob('0 0 * * 6', () => {
-  console.log('⏰ RESET TOURNOI EN COURS');
 
-  tournament = {
-    players: [],
-    matches: [],
-    status: 'registration',
-    currentRound: 0,
-    winner: null
-  };
+// Ouvre les inscriptions samedi 00h00
+schedule.scheduleJob(
+  { hour: 0, minute: 0, dayOfWeek: 6, tz: "Africa/Kinshasa" },
+  () => {
 
-  fullGamePlayers = [];
-  accounts.clear();
-  onlineUsers.clear();
+    tournament.players = [];
+    tournament.matches = [];
+    tournament.currentRound = 0;
+    tournament.winner = null;
+    tournament.status = "registration";
 
-  io.emit('dashboardUpdate');
+    io.emit("dashboardUpdate");
 
-  console.log('✅ TOURNOI RESET TERMINÉ');
+    console.log("Inscriptions ouvertes");
 });
 
-schedule.scheduleJob({ hour: 23, minute: 59, dayOfWeek: 0, tz: 'Africa/Kinshasa' }, () => {
-  // 🔹 Ajoute ici pour debug
-  console.log('Players inscrits avant lancement tournoi:', tournament.players.length);
+// Lance le tournoi lundi 00h00
+schedule.scheduleJob(
+  { hour: 0, minute: 0, dayOfWeek: 1, tz: "Africa/Kinshasa" },
+  () => {
 
-  if (tournament.players.length < 2) {
-    tournament.status = 'closed';
-    console.log('Pas assez de joueurs. Tournoi annulé.');
-    io.emit('dashboardUpdate');
-    return;
-  }
+    if (tournament.players.length < 2) {
 
-  tournament.currentRound = 1;
-  genererProgramme();
-  io.emit('dashboardUpdate');
-  console.log('=== Inscriptions fermées. Tournoi lancé ===');
+      tournament.status = "closed";
+
+      io.emit("dashboardUpdate");
+
+      console.log("Tournoi annulé : moins de 2 joueurs");
+
+      return;
+    }
+
+    tournament.currentRound = 1;
+
+    genererProgramme();
+
+    tournament.status = "running";
+
+    io.emit("dashboardUpdate");
+
+    console.log("Tournoi lancé automatiquement");
 });
-
-  tournament.players.push({
-    id: user._id,
-    firstname: user.firstname,
-    name: user.name,
-    games,
-    gameType: games[0],
-    joinedAt: Date.now(),
-    eliminated: false
-  });
-
-  io.emit('dashboardUpdate');
-  res.json({ success: true, accessCode, message: 'Inscription réussie!' });
-}); // <- UN SEUL }); ici
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
