@@ -435,6 +435,17 @@ app.post('/api/player/register', (req, res) => {
 
 // API Tournoi inscription multi-jeux
 app.post('/api/tournament/join', (req, res) => {
+  if (!inscriptionOuverte()) {
+  return res.status(403).json({
+    error: "Les inscriptions sont ouvertes uniquement du samedi au dimanche."
+  });
+}
+
+if (tournament.status !== "registration") {
+  return res.status(403).json({
+    error: "Les inscriptions sont fermées."
+  });
+}
   const { token, games } = req.body;
 
   const player = fullGamePlayers.find(p => String(p.id) === String(token));
