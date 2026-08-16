@@ -713,7 +713,7 @@ schedule.scheduleJob(
     console.log("Tournoi lancé automatiquement");
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Serveur sur http://localhost:${PORT}`);
   console.log('Heure serveur Kinshasa:', new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Kinshasa' }));
