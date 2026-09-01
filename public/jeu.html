@@ -15,6 +15,7 @@
   border-radius: 8px;
 }
 </style>
+<script>(function () {  const navigation = performance.getEntriesByType('navigation')[0];  // Actualisation  if (navigation && navigation.type === 'reload') {    window.location.replace('/Paris.html');    return;  }  // Navigation directe vers la page  if (!document.referrer || !document.referrer.includes('Paris.html')) {    window.location.replace('/Paris.html');  }})();</script>
 </head>
 <body>
 <div class="game-container">

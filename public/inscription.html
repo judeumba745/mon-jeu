@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +13,7 @@
       <input id="password" type="password" placeholder="Mot de passe" required>
       <input id="firstname" type="text" placeholder="Prénom" required>
       <input id="name" type="text" placeholder="Nom" required>
+      <input id="phone" type="tel" placeholder="Numero Orange Money/Airtel Money" required>
       <button onclick="register()">S'inscrire</button>
       <div id="msg" class="msg"></div>
       <p style="margin-top:15px; text-align:center; color:#94a3b8;">
@@ -28,9 +28,10 @@ async function register() {
   const password = document.getElementById('password').value;
   const firstname = document.getElementById('firstname').value.trim();
   const name = document.getElementById('name').value.trim();
+   const phone = document.getElementById('phone').value.trim();
   const msg = document.getElementById('msg');
  
-  if (!email || !password || !firstname || !name) {
+  if (!email || !password || !firstname || !name || !phone) {
     msg.className = 'msg error';
     msg.innerText = 'Remplis tous les champs';
     return;
@@ -40,7 +41,7 @@ async function register() {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ email, password, firstname, name })
+      body: JSON.stringify({ email, password, firstname, name, phone })
     });
    
     const data = await res.json();

@@ -1,82 +1,79 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connexion - GameOnline</title>
-  <link rel="stylesheet" href="/style.css">
-
-  <!-- ✅ AJOUT 1 -->
-  <script src="/socket.io/socket.io.js"></script>
-
-  <!-- ✅ AJOUT 2 -->
-  <script>
-    const socket = io();
-  </script>
-
-</head>
-
-<body>
-  <div class="container">
-    <h2 class="form-title">Se connecter</h2>
-
-    <div class="card-dark">
-      <input id="email" type="email" placeholder="Email" required>
-      <input id="password" type="password" placeholder="Mot de passe" required>
-      <button onclick="login()">Se connecter</button>
-
-      <div id="msg" class="msg"></div>
-
-      <p style="margin-top:15px; text-align:center; color:#94a3b8;">
-        Pas de compte ? <a href="/inscription.html" style="color:#00ff66;">S'inscrire</a>
-      </p>
-    </div>
-  </div>
-
-<script>
-async function login() {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const msg = document.getElementById('msg');
-
-  if (!email || !password) {
-    msg.className = 'msg error';
-    msg.innerText = 'Remplis tous les champs';
-    return;
-  }
-
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      localStorage.setItem('gameonline_token', data.token);
-
-      // 🔥 AJOUT IMPORTANT ICI
-      socket.emit('userOnline', {
-        playerId: data.token,
-        firstname: data.player.firstname,
-        name: data.player.name,
-        currentGame: null
-      });
-
-      window.location = '/tableau.html';
-    } else {
-      msg.className = 'msg error';
-      msg.innerText = data.error;
-    }
-
-  } catch (err) {
-    msg.className = 'msg error';
-    msg.innerText = 'Erreur serveur';
-  }
+<!DOCTYPE html> <html> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Connexion - GameOnline</title> <link rel="stylesheet" href="/style.css"> <link rel="manifest" href="/manifest.json"> <link rel="icon" href="/icone-192.png"> <link rel="apple-touch-icon" href="/icone-192.png"> <!-- ✅ AJOUT 1 --> <script src="/socket.io/socket.io.js"></script> <!-- ✅ AJOUT 2 --> <script> const socket = io(); </script> </head> <body> <div class="container"> <h2 class="form-title">Se connecter</h2> <div class="card-dark"> <input id="email" type="email" placeholder="Email" required> <input id="password" type="password" placeholder="Mot de passe" required> <button onclick="login()">Se connecter</button> <div id="msg" class="msg"></div> <p style="margin-top:15px; text-align:center; color:#94a3b8;"> Pas de compte ? <a href="/inscription.html" style="color:#00ff66;">S'inscrire</a> </p> <p style="margin-top:8px; text-align:center;"> <a href="#" id="lienMotDePasseOublie" style="color:#94a3b8; font-size:13px;">Mot de passe oublie ?</a> </p> </div> </div> <div id="modalOubli" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); align-items:center; justify-content:center; z-index:9999;"> <div class="card-dark" style="max-width:340px; width:90%;"> <h3 id="oubliTitre" style="margin-top:0; color:#fff;">Mot de passe oublie</h3> <div id="etapeDemande"> <input id="oubliPhone" type="tel" placeholder="Numero de telephone"> <input id="oubliEmail" type="email" placeholder="Email Gmail du compte"> <button onclick="demanderReinitialisation()">Envoyer le code</button> </div> <div id="etapeCode" style="display:none;"> <input id="oubliCode" type="text" placeholder="Code recu par email"> <input id="oubliNouveauMdp" type="password" placeholder="Nouveau mot de passe"> <button onclick="validerReinitialisation()">Valider</button> </div> <div id="oubliMsg" class="msg"></div> <button onclick="fermerModalOubli()" style="margin-top:10px; background:transparent; border:1px solid #334155; color:#94a3b8;">Annuler</button> </div> </div> <script> async function login() { const email = document.getElementById('email').value.trim(); const password = document.getElementById('password').value; const msg = document.getElementById('msg'); if (!email || !password) { msg.className = 'msg error'; msg.innerText = 'Remplis tous les champs'; return; } try { const res = await fetch('/api/auth/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, password }) }); const data = await res.json(); if (data.success) { localStorage.setItem('gameonline_token', data.token);
+socket.emit('userOnline', { playerId: data.token, firstname: data.player.firstname, name: data.player.name, currentGame: null }); window.location = '/tableau.html'; } else { msg.className = 'msg error'; msg.innerText = data.error; } } catch (err) { msg.className = 'msg error'; msg.innerText = 'Erreur serveur'; } }
+let emailPourReinitialisation = "";
+document.getElementById("lienMotDePasseOublie").addEventListener("click", function(e) {
+    e.preventDefault();
+    document.getElementById("modalOubli").style.display = "flex";
+});
+function fermerModalOubli() {
+    document.getElementById("modalOubli").style.display = "none";
+    document.getElementById("etapeDemande").style.display = "block";
+    document.getElementById("etapeCode").style.display = "none";
+    document.getElementById("oubliMsg").textContent = "";
 }
-</script>
-
-</body>
-</html>
+async function demanderReinitialisation() {
+    const phone = document.getElementById("oubliPhone").value.trim();
+    const email = document.getElementById("oubliEmail").value.trim();
+    const msg = document.getElementById("oubliMsg");
+    if (!phone || !email) {
+        msg.className = "msg error";
+        msg.innerText = "Remplis le numero et l'email";
+        return;
+    }
+    try {
+        const res = await fetch("/api/auth/forgot-password", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ phone: phone, email: email })
+        });
+        const data = await res.json();
+        if (data.success) {
+            emailPourReinitialisation = email;
+            msg.className = "msg success";
+            msg.innerText = data.message;
+            document.getElementById("etapeDemande").style.display = "none";
+            document.getElementById("etapeCode").style.display = "block";
+        } else {
+            msg.className = "msg error";
+            msg.innerText = data.error;
+        }
+    } catch (err) {
+        msg.className = "msg error";
+        msg.innerText = "Erreur serveur";
+    }
+}
+async function validerReinitialisation() {
+    const code = document.getElementById("oubliCode").value.trim();
+    const newPassword = document.getElementById("oubliNouveauMdp").value;
+    const msg = document.getElementById("oubliMsg");
+    if (!code || !newPassword) {
+        msg.className = "msg error";
+        msg.innerText = "Remplis le code et le nouveau mot de passe";
+        return;
+    }
+    try {
+        const res = await fetch("/api/auth/reset-password", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ email: emailPourReinitialisation, code: code, newPassword: newPassword })
+        });
+        const data = await res.json();
+        if (data.success) {
+            msg.className = "msg success";
+            msg.innerText = data.message + " Tu peux te connecter.";
+            setTimeout(fermerModalOubli, 2500);
+        } else {
+            msg.className = "msg error";
+            msg.innerText = data.error;
+        }
+    } catch (err) {
+        msg.className = "msg error";
+        msg.innerText = "Erreur serveur";
+    }
+}
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+        navigator.serviceWorker.register("/sw.js").catch(function(err) { console.error("SW:", err); });
+    });
+}
+</script> </body> </html> 

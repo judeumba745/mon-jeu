@@ -35,6 +35,7 @@ body { background: #0a0a0a; color: #fff; display: flex; flex-direction: column; 
 }
 button { padding: 15px 30px; font-size: 20px; margin-top: 20px; cursor: pointer; }
 </style>
+<script>(function () {  const navigation = performance.getEntriesByType('navigation')[0];  // Actualisation  if (navigation && navigation.type === 'reload') {    window.location.replace('/Paris.html');    return;  }  // Navigation directe vers la page  if (!document.referrer || !document.referrer.includes('Paris.html')) {    window.location.replace('/Paris.html');  }})();</script>
 </head>
 <body>
 <div id="mode-badge">Mode : Puissance 4</div>

@@ -13,6 +13,7 @@ body { background: #0a0a0a; color: #fff; font-family: Arial; display: flex; flex
 .case:hover { background: #222; }
 #gameOver { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; z-index: 100; }
 </style>
+<script>(function () {  const navigation = performance.getEntriesByType('navigation')[0];  // Actualisation  if (navigation && navigation.type === 'reload') {    window.location.replace('/Paris.html');    return;  }  // Navigation directe vers la page  if (!document.referrer || !document.referrer.includes('Paris.html')) {    window.location.replace('/Paris.html');  }})();</script>
 </head>
 <body>
 <div id="mode-badge">Mode : Morpion</div>
